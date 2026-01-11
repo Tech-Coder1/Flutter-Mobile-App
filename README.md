@@ -1,6 +1,6 @@
 # Flutter Mobile App
 
-This is a placeholder README file for the Flutter Mobile App repository cloned into the Colab environment. 
+This README file is for the Flutter Mobile App repository cloned into the Colab environment. 
 
 ## Project Overview
 
