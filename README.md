@@ -223,16 +223,49 @@ flutter test               # Run tests
 
 ## 📸 Screenshots
 
-The app includes comprehensive UI mockups showing all screens and features:
+The app includes comprehensive UI mockups showing all screens and features. Screenshots are available in the `screenshots/` folder:
 
-- ![Login Screen](Screenshot%202026-01-19%20at%209.06.33 AM.png)
-- ![Dashboard](Screenshot%202026-01-19%20at%209.06.43 AM.png)
-- ![Courses](Screenshot%202026-01-19%20at%209.06.51 AM.png)
-- ![Internships](Screenshot%202026-01-19%20at%209.07.05 AM.png)
-- ![Application Form](Screenshot%202026-01-19%20at%209.07.14 AM.png)
-- ![Profile](Screenshot%202026-01-19%20at%209.07.18 AM.png)
-- ![Admin Login](Screenshot%202026-01-19%20at%209.07.21 AM.png)
-- ![Admin Dashboard](Screenshot%202026-01-19%20at%209.07.32 AM.png)
+### Authentication & Onboarding
+- ![Login Screen](screenshots/login_screen.png)
+- ![Signup Screen](screenshots/signup_screen.png)
+- ![Admin Login](screenshots/admin_login_screen.png)
+- ![Onboarding](screenshots/onboarding_screen.png)
+
+### Main App Features
+- ![Dashboard](screenshots/user_dashboard.png)
+- ![Courses](screenshots/courses_screen.png)
+- ![Internships](screenshots/internships_screen.png)
+- ![Application Form](screenshots/application_form.png)
+
+### User Management
+- ![Profile](screenshots/profile_screen.png)
+- ![Admin Dashboard](screenshots/admin_dashboard.png)
+
+### App Flow Screenshots
+- ![Complete User Journey](screenshots/user_journey_flow.png)
+- ![Admin Panel Overview](screenshots/admin_overview.png)
+
+*Note: Add your actual screenshots to the `screenshots/` folder and update the filenames accordingly.*
+
+### 📱 How to Add Screenshots
+
+1. **Run the app** in Chrome: `flutter run -d chrome`
+2. **Navigate through all screens** and features
+3. **Take screenshots** using your browser's screenshot tool or keyboard shortcuts
+4. **Save images** to the `screenshots/` folder with descriptive names
+5. **Update README** with correct filenames
+6. **Commit and push** the new screenshots
+
+**Recommended Screenshot Names:**
+- `login_screen.png` - User login interface
+- `onboarding_screen.png` - Post-login introduction
+- `user_dashboard.png` - Main dashboard with navigation
+- `courses_screen.png` - Course catalog
+- `internships_screen.png` - Internship listings
+- `application_form.png` - Internship application form
+- `profile_screen.png` - User profile page
+- `admin_login_screen.png` - Administrator login
+- `admin_dashboard.png` - Admin management panel
 
 ## 🔧 Development
 
