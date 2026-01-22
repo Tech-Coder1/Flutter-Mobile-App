@@ -1,10 +1,23 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
+import '../services/user_service.dart';
+import '../models/user_model.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
   @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final authService = AuthService();
+  final userService = UserService();
+
+  @override
   Widget build(BuildContext context) {
+    final userId = authService.currentUser?.uid ?? '';
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
@@ -18,43 +31,52 @@ class ProfileScreen extends StatelessWidget {
         child: Column(
           children: [
             // Profile Header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(32.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4169E1),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.white,
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Color(0xFF4169E1),
-                    ),
+            StreamBuilder<UserModel?>(
+              stream: userService.getUserStream(userId),
+              builder: (context, snapshot) {
+                final user = snapshot.data;
+                final fullName = user?.fullName ?? 'User';
+                final email = user?.email ?? 'user@example.com';
+
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(32.0),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4169E1),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'John Doe',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  child: Column(
+                    children: [
+                      const CircleAvatar(
+                        radius: 50,
+                        backgroundColor: Colors.white,
+                        child: Icon(
+                          Icons.person,
+                          size: 50,
+                          color: Color(0xFF4169E1),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        fullName,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        email,
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.8),
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'john.doe@email.com',
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.8),
-                      fontSize: 16,
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
             const SizedBox(height: 32),
             // My Learning Section
@@ -72,48 +94,60 @@ class ProfileScreen extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.book_outlined, size: 32, color: Color(0xFF4169E1)),
-                          const SizedBox(height: 12),
-                          const Text('Certificates'),
-                          const SizedBox(height: 4),
-                          Text(
-                            '3',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: const Color(0xFF4169E1),
-                                ),
+                  child: StreamBuilder<UserModel?>(
+                    stream: userService.getUserStream(userId),
+                    builder: (context, snapshot) {
+                      final certificatesCount = snapshot.data?.certificatesCount ?? 0;
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              const Icon(Icons.book_outlined, size: 32, color: Color(0xFF4169E1)),
+                              const SizedBox(height: 12),
+                              const Text('Certificates'),
+                              const SizedBox(height: 4),
+                              Text(
+                                '$certificatesCount',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF4169E1),
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Column(
-                        children: [
-                          const Icon(Icons.work_outline, size: 32, color: Colors.green),
-                          const SizedBox(height: 12),
-                          const Text('Applications'),
-                          const SizedBox(height: 4),
-                          Text(
-                            '5',
-                            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,
-                                ),
+                  child: StreamBuilder<UserModel?>(
+                    stream: userService.getUserStream(userId),
+                    builder: (context, snapshot) {
+                      final applicationsCount = snapshot.data?.applicationsCount ?? 0;
+                      return Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(20.0),
+                          child: Column(
+                            children: [
+                              const Icon(Icons.work_outline, size: 32, color: Colors.green),
+                              const SizedBox(height: 12),
+                              const Text('Applications'),
+                              const SizedBox(height: 4),
+                              Text(
+                                '$applicationsCount',
+                                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.green,
+                                    ),
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                    ),
+                        ),
+                      );
+                    },
                   ),
                 ),
               ],
@@ -139,8 +173,17 @@ class ProfileScreen extends StatelessWidget {
                     title: const Text('Account Settings'),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF6B7280)),
                     onTap: () {
-                      // Navigate to account settings
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Feature coming soon')),
+                      );
                     },
+                  ),
+                  const Divider(height: 1),
+                  ListTile(
+                    leading: const Icon(Icons.feedback_outlined, color: Color(0xFF6B7280)),
+                    title: const Text('Give Feedback'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF6B7280)),
+                    onTap: () => Navigator.pushNamed(context, '/feedback'),
                   ),
                   const Divider(height: 1),
                   ListTile(
@@ -149,7 +192,6 @@ class ProfileScreen extends StatelessWidget {
                     textColor: Colors.red,
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.red),
                     onTap: () {
-                      // Show logout confirmation
                       showDialog(
                         context: context,
                         builder: (context) => AlertDialog(
@@ -161,13 +203,16 @@ class ProfileScreen extends StatelessWidget {
                               child: const Text('Cancel'),
                             ),
                             TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                Navigator.pushNamedAndRemoveUntil(
-                                  context,
-                                  '/login',
-                                  (route) => false,
-                                );
+                              onPressed: () async {
+                                await authService.signOut();
+                                if (mounted) {
+                                  Navigator.pop(context);
+                                  Navigator.pushNamedAndRemoveUntil(
+                                    context,
+                                    '/login',
+                                    (route) => false,
+                                  );
+                                }
                               },
                               child: const Text('Log Out'),
                             ),

@@ -1,0 +1,586 @@
+import 'package:flutter/material.dart';
+import '../services/application_service.dart';
+import '../models/application_model.dart';
+
+class AdminApplicationReviewScreen extends StatefulWidget {
+  const AdminApplicationReviewScreen({Key? key}) : super(key: key);
+
+  @override
+  State<AdminApplicationReviewScreen> createState() =>
+      _AdminApplicationReviewScreenState();
+}
+
+class _AdminApplicationReviewScreenState
+    extends State<AdminApplicationReviewScreen> {
+  final _applicationService = ApplicationService();
+  String _selectedFilter = 'all'; // all, pending, approved, rejected
+  String _searchQuery = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Application Reviews'),
+        backgroundColor: const Color(0xFF4169E1),
+        elevation: 0,
+      ),
+      body: Column(
+        children: [
+          _buildFilterSection(),
+          Expanded(
+            child: _buildApplicationsList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterSection() {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        children: [
+          TextField(
+            onChanged: (value) {
+              setState(() => _searchQuery = value.toLowerCase());
+            },
+            decoration: InputDecoration(
+              hintText: 'Search by name or email...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                _buildFilterChip('All', 'all'),
+                const SizedBox(width: 8),
+                _buildFilterChip('Pending', 'pending'),
+                const SizedBox(width: 8),
+                _buildFilterChip('Approved', 'approved'),
+                const SizedBox(width: 8),
+                _buildFilterChip('Rejected', 'rejected'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, String value) {
+    final isSelected = _selectedFilter == value;
+    return FilterChip(
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (selected) {
+        setState(() => _selectedFilter = value);
+      },
+      backgroundColor: Colors.grey[200],
+      selectedColor: const Color(0xFF4169E1),
+      labelStyle: TextStyle(
+        color: isSelected ? Colors.white : Colors.black,
+      ),
+    );
+  }
+
+  Widget _buildApplicationsList() {
+    return StreamBuilder<List<ApplicationModel>>(
+      stream: _getFilteredApplicationsStream(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                const SizedBox(height: 16),
+                Text('Error: ${snapshot.error}'),
+              ],
+            ),
+          );
+        }
+
+        final applications = snapshot.data ?? [];
+
+        // Filter by search query
+        final filteredApplications = applications.where((app) {
+          if (_searchQuery.isEmpty) return true;
+          return app.fullName.toLowerCase().contains(_searchQuery) ||
+              app.email.toLowerCase().contains(_searchQuery);
+        }).toList();
+
+        if (filteredApplications.isEmpty) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[400]),
+                const SizedBox(height: 16),
+                Text(
+                  _searchQuery.isEmpty
+                      ? 'No applications found'
+                      : 'No applications match your search',
+                  style: TextStyle(color: Colors.grey[600]),
+                ),
+              ],
+            ),
+          );
+        }
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(8),
+          itemCount: filteredApplications.length,
+          itemBuilder: (context, index) {
+            return _buildApplicationCard(filteredApplications[index]);
+          },
+        );
+      },
+    );
+  }
+
+  Stream<List<ApplicationModel>> _getFilteredApplicationsStream() {
+    if (_selectedFilter == 'all') {
+      return _applicationService.getAllApplications();
+    } else {
+      return _applicationService.getApplicationsByStatus(_selectedFilter);
+    }
+  }
+
+  Widget _buildApplicationCard(ApplicationModel application) {
+    final statusColor = _getStatusColor(application.status);
+    final statusIcon = _getStatusIcon(application.status);
+
+    return Card(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      child: InkWell(
+        onTap: () => _showApplicationDetails(application),
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header with name and status
+              Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          application.fullName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          application.email,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: statusColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(statusIcon, size: 14, color: statusColor),
+                        const SizedBox(width: 4),
+                        Text(
+                          application.status.toUpperCase(),
+                          style: TextStyle(
+                            color: statusColor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              // Additional info
+              Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(Icons.phone_outlined,
+                            size: 14, color: Colors.grey[600]),
+                        const SizedBox(width: 8),
+                        Text(
+                          application.phone,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (application.resumeUrl.isNotEmpty)
+                    Icon(
+                      Icons.picture_as_pdf,
+                      size: 18,
+                      color: Colors.red[600],
+                    ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showApplicationDetails(ApplicationModel application) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: ListView(
+            controller: scrollController,
+            padding: const EdgeInsets.all(20),
+            children: [
+              // Header
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Application Details',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Candidate info
+              _buildDetailSection(
+                'Candidate Information',
+                [
+                  _buildDetailRow('Full Name', application.fullName),
+                  _buildDetailRow('Email', application.email),
+                  _buildDetailRow('Phone', application.phone),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Application details
+              _buildDetailSection(
+                'Application Details',
+                [
+                  _buildDetailRow('LinkedIn URL', application.linkedInUrl),
+                  _buildDetailRow(
+                    'Skills & Experience',
+                    application.skillsExperience,
+                    multiline: true,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Resume section
+              if (application.resumeUrl.isNotEmpty)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Resume',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    InkWell(
+                      onTap: () => _openResume(application.resumeUrl),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey[300]!),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.picture_as_pdf,
+                                color: Colors.red, size: 24),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    application.resumeFileName.isEmpty
+                                        ? 'resume.pdf'
+                                        : application.resumeFileName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Tap to view',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.open_in_new, size: 18),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                  ],
+                ),
+              // Status badge
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _getStatusColor(application.status).withOpacity(0.1),
+                  border: Border.all(
+                    color: _getStatusColor(application.status),
+                  ),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      _getStatusIcon(application.status),
+                      color: _getStatusColor(application.status),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Status: ${application.status.toUpperCase()}',
+                        style: TextStyle(
+                          color: _getStatusColor(application.status),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Action buttons
+              if (application.status == 'pending') ...[
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () => _updateApplicationStatus(
+                            application.applicationId, 'rejected'),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                        ),
+                        child: const Text('Reject'),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => _updateApplicationStatus(
+                            application.applicationId, 'approved'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                        ),
+                        child: const Text('Approve'),
+                      ),
+                    ),
+                  ],
+                ),
+              ] else ...[
+                ElevatedButton.icon(
+                  onPressed: null,
+                  icon: const Icon(Icons.lock),
+                  label: const Text('Application Already Reviewed'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[400],
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetailSection(String title, List<Widget> children) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.grey[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[200]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int i = 0; i < children.length; i++) ...[
+                children[i],
+                if (i < children.length - 1)
+                  Divider(color: Colors.grey[300], height: 16),
+              ]
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(
+    String label,
+    String value, {
+    bool multiline = false,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 13),
+          maxLines: multiline ? 4 : 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+      ],
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Colors.orange;
+      case 'approved':
+        return Colors.green;
+      case 'rejected':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getStatusIcon(String status) {
+    switch (status.toLowerCase()) {
+      case 'pending':
+        return Icons.schedule;
+      case 'approved':
+        return Icons.check_circle;
+      case 'rejected':
+        return Icons.cancel;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  Future<void> _updateApplicationStatus(
+      String applicationId, String newStatus) async {
+    try {
+      await _applicationService.updateApplicationStatus(
+          applicationId, newStatus);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Application ${newStatus == 'approved' ? 'approved' : 'rejected'} successfully',
+            ),
+            backgroundColor:
+                newStatus == 'approved' ? Colors.green : Colors.red,
+          ),
+        );
+        Navigator.pop(context);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _openResume(String url) {
+    // Show a simple dialog indicating the resume URL
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Resume'),
+        content: const Text('Resume link available. To implement full PDF viewing, '
+            'add a PDF viewer package like pdf or google_mlkit_document_scanner.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+}

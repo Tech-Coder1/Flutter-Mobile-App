@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -9,8 +11,29 @@ import 'screens/internships_screen.dart';
 import 'screens/application_form.dart';
 import 'screens/profile_screen.dart';
 import 'screens/admin_dashboard.dart';
+import 'screens/admin_application_review.dart';
+import 'screens/course_detail_screen.dart';
+import 'screens/user_support_tickets_screen.dart';
+import 'screens/admin_support_tickets_screen.dart';
+import 'screens/internship_detail_screen.dart';
+import 'screens/user_feedback_screen.dart';
+import 'screens/admin_feedback_screen.dart';
+import 'models/course_model.dart';
+import 'models/internship_model.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    // Firebase initialization errors are non-fatal
+    // App can still run without Firebase in development
+    debugPrint('Firebase initialization error: $e');
+  }
+  
   runApp(const ExcelerateApp());
 }
 
@@ -110,6 +133,25 @@ class ExcelerateApp extends StatelessWidget {
         '/application_form': (context) => const ApplicationForm(),
         '/profile': (context) => const ProfileScreen(),
         '/admin_dashboard': (context) => const AdminDashboard(),
+        '/admin_application_review': (context) => const AdminApplicationReviewScreen(),
+        '/course_detail': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is CourseModel) {
+            return CourseDetailScreen(course: args);
+          }
+          return const Scaffold(body: Center(child: Text('No course found')));
+        },
+        '/internship_detail': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          if (args is InternshipModel) {
+            return InternshipDetailScreen(internship: args);
+          }
+          return const Scaffold(body: Center(child: Text('No internship found')));
+        },
+        '/user_support_tickets': (context) => const UserSupportTicketsScreen(),
+        '/admin_support_tickets': (context) => const AdminSupportTicketsScreen(),
+        '/feedback': (context) => const UserFeedbackScreen(),
+        '/admin_feedback': (context) => const AdminFeedbackScreen(),
       },
     );
   }
