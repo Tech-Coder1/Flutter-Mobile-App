@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/application_service.dart';
 import '../models/application_model.dart';
+import '../widgets/admin_sidebar.dart';
 
 class AdminApplicationReviewScreen extends StatefulWidget {
   const AdminApplicationReviewScreen({Key? key}) : super(key: key);
@@ -11,61 +12,47 @@ class AdminApplicationReviewScreen extends StatefulWidget {
 }
 
 class _AdminApplicationReviewScreenState
-    extends State<AdminApplicationReviewScreen> {
+    extends State<AdminApplicationReviewScreen>
+    with SingleTickerProviderStateMixin {
   final _applicationService = ApplicationService();
-  String _selectedFilter = 'all'; // all, pending, approved, rejected
   String _searchQuery = '';
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 4, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Application Reviews'),
-        backgroundColor: const Color(0xFF4169E1),
-        elevation: 0,
-      ),
-      body: Column(
+      backgroundColor: Colors.grey[50],
+      body: Row(
         children: [
-          _buildFilterSection(),
+          const AdminSidebar(currentRoute: '/admin_application_review'),
           Expanded(
-            child: _buildApplicationsList(),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFilterSection() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          TextField(
-            onChanged: (value) {
-              setState(() => _searchQuery = value.toLowerCase());
-            },
-            decoration: InputDecoration(
-              hintText: 'Search by name or email...',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
+            child: Column(
               children: [
-                _buildFilterChip('All', 'all'),
-                const SizedBox(width: 8),
-                _buildFilterChip('Pending', 'pending'),
-                const SizedBox(width: 8),
-                _buildFilterChip('Approved', 'approved'),
-                const SizedBox(width: 8),
-                _buildFilterChip('Rejected', 'rejected'),
+                _buildHeader(),
+                _buildTabBar(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _buildApplicationsList('all'),
+                      _buildApplicationsList('pending'),
+                      _buildApplicationsList('approved'),
+                      _buildApplicationsList('rejected'),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -74,25 +61,80 @@ class _AdminApplicationReviewScreenState
     );
   }
 
-  Widget _buildFilterChip(String label, String value) {
-    final isSelected = _selectedFilter == value;
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (selected) {
-        setState(() => _selectedFilter = value);
-      },
-      backgroundColor: Colors.grey[200],
-      selectedColor: const Color(0xFF4169E1),
-      labelStyle: TextStyle(
-        color: isSelected ? Colors.white : Colors.black,
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Application Reviews',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Review and manage all internship and course applications',
+            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            onChanged: (value) {
+              setState(() => _searchQuery = value.toLowerCase());
+            },
+            decoration: InputDecoration(
+              hintText: 'Search by name or email...',
+              prefixIcon: const Icon(Icons.search, size: 20),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              filled: true,
+              fillColor: Colors.grey[50],
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildApplicationsList() {
+  Widget _buildTabBar() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        labelColor: const Color(0xFF4169E1),
+        unselectedLabelColor: Colors.grey[600],
+        indicatorColor: const Color(0xFF4169E1),
+        indicatorWeight: 3,
+        labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        tabs: const [
+          Tab(text: 'All Applications'),
+          Tab(text: 'Pending'),
+          Tab(text: 'Approved'),
+          Tab(text: 'Rejected'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApplicationsList(String filter) {
     return StreamBuilder<List<ApplicationModel>>(
-      stream: _getFilteredApplicationsStream(),
+      stream: _getFilteredApplicationsStream(filter),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -125,13 +167,20 @@ class _AdminApplicationReviewScreenState
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.inbox_outlined, size: 48, color: Colors.grey[400]),
+                Icon(Icons.inbox_outlined, size: 64, color: Colors.grey[300]),
                 const SizedBox(height: 16),
                 Text(
                   _searchQuery.isEmpty
                       ? 'No applications found'
                       : 'No applications match your search',
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 16),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  _searchQuery.isEmpty
+                      ? 'Applications will appear here once students submit them'
+                      : 'Try adjusting your search terms',
+                  style: TextStyle(color: Colors.grey[500], fontSize: 13),
                 ),
               ],
             ),
@@ -139,7 +188,7 @@ class _AdminApplicationReviewScreenState
         }
 
         return ListView.builder(
-          padding: const EdgeInsets.all(8),
+          padding: const EdgeInsets.all(16),
           itemCount: filteredApplications.length,
           itemBuilder: (context, index) {
             return _buildApplicationCard(filteredApplications[index]);
@@ -149,11 +198,11 @@ class _AdminApplicationReviewScreenState
     );
   }
 
-  Stream<List<ApplicationModel>> _getFilteredApplicationsStream() {
-    if (_selectedFilter == 'all') {
+  Stream<List<ApplicationModel>> _getFilteredApplicationsStream(String filter) {
+    if (filter == 'all') {
       return _applicationService.getAllApplications();
     } else {
-      return _applicationService.getApplicationsByStatus(_selectedFilter);
+      return _applicationService.getApplicationsByStatus(filter);
     }
   }
 
@@ -162,18 +211,42 @@ class _AdminApplicationReviewScreenState
     final statusIcon = _getStatusIcon(application.status);
 
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(color: Colors.grey[200]!),
+      ),
       child: InkWell(
         onTap: () => _showApplicationDetails(application),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header with name and status
               Row(
                 children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF4169E1).withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: Center(
+                      child: Text(
+                        application.fullName.substring(0, 1).toUpperCase(),
+                        style: const TextStyle(
+                          color: Color(0xFF4169E1),
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -182,14 +255,14 @@ class _AdminApplicationReviewScreenState
                           application.fullName,
                           style: const TextStyle(
                             fontSize: 16,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           application.email,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 13,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -197,22 +270,25 @@ class _AdminApplicationReviewScreenState
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: statusColor.withOpacity(0.3)),
                     ),
                     child: Row(
                       children: [
                         Icon(statusIcon, size: 14, color: statusColor),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 6),
                         Text(
                           application.status.toUpperCase(),
                           style: TextStyle(
                             color: statusColor,
                             fontSize: 12,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
                       ],
@@ -220,32 +296,49 @@ class _AdminApplicationReviewScreenState
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
               // Additional info
               Row(
                 children: [
                   Expanded(
                     child: Row(
                       children: [
-                        Icon(Icons.phone_outlined,
-                            size: 14, color: Colors.grey[600]),
+                        Icon(
+                          Icons.phone_outlined,
+                          size: 16,
+                          color: Colors.grey[600],
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           application.phone,
                           style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey[600],
+                            fontSize: 13,
+                            color: Colors.grey[700],
                           ),
                         ),
                       ],
                     ),
                   ),
                   if (application.resumeUrl.isNotEmpty)
-                    Icon(
-                      Icons.picture_as_pdf,
-                      size: 18,
-                      color: Colors.red[600],
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.picture_as_pdf,
+                          size: 18,
+                          color: Colors.red[600],
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          'Resume',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey[700],
+                          ),
+                        ),
+                      ],
                     ),
+                  const SizedBox(width: 16),
+                  Icon(Icons.chevron_right, size: 20, color: Colors.grey[400]),
                 ],
               ),
             ],
@@ -279,10 +372,7 @@ class _AdminApplicationReviewScreenState
                 children: [
                   const Text(
                     'Application Details',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   IconButton(
                     icon: const Icon(Icons.close),
@@ -292,27 +382,21 @@ class _AdminApplicationReviewScreenState
               ),
               const SizedBox(height: 16),
               // Candidate info
-              _buildDetailSection(
-                'Candidate Information',
-                [
-                  _buildDetailRow('Full Name', application.fullName),
-                  _buildDetailRow('Email', application.email),
-                  _buildDetailRow('Phone', application.phone),
-                ],
-              ),
+              _buildDetailSection('Candidate Information', [
+                _buildDetailRow('Full Name', application.fullName),
+                _buildDetailRow('Email', application.email),
+                _buildDetailRow('Phone', application.phone),
+              ]),
               const SizedBox(height: 20),
               // Application details
-              _buildDetailSection(
-                'Application Details',
-                [
-                  _buildDetailRow('LinkedIn URL', application.linkedInUrl),
-                  _buildDetailRow(
-                    'Skills & Experience',
-                    application.skillsExperience,
-                    multiline: true,
-                  ),
-                ],
-              ),
+              _buildDetailSection('Application Details', [
+                _buildDetailRow('LinkedIn URL', application.linkedInUrl),
+                _buildDetailRow(
+                  'Skills & Experience',
+                  application.skillsExperience,
+                  multiline: true,
+                ),
+              ]),
               const SizedBox(height: 20),
               // Resume section
               if (application.resumeUrl.isNotEmpty)
@@ -337,8 +421,11 @@ class _AdminApplicationReviewScreenState
                         ),
                         child: Row(
                           children: [
-                            const Icon(Icons.picture_as_pdf,
-                                color: Colors.red, size: 24),
+                            const Icon(
+                              Icons.picture_as_pdf,
+                              color: Colors.red,
+                              size: 24,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -410,7 +497,9 @@ class _AdminApplicationReviewScreenState
                     Expanded(
                       child: OutlinedButton(
                         onPressed: () => _updateApplicationStatus(
-                            application.applicationId, 'rejected'),
+                          application.applicationId,
+                          'rejected',
+                        ),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.red,
                           side: const BorderSide(color: Colors.red),
@@ -422,7 +511,9 @@ class _AdminApplicationReviewScreenState
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () => _updateApplicationStatus(
-                            application.applicationId, 'approved'),
+                          application.applicationId,
+                          'approved',
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green,
                         ),
@@ -455,10 +546,7 @@ class _AdminApplicationReviewScreenState
       children: [
         Text(
           title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
         const SizedBox(height: 8),
         Container(
@@ -475,7 +563,7 @@ class _AdminApplicationReviewScreenState
                 children[i],
                 if (i < children.length - 1)
                   Divider(color: Colors.grey[300], height: 16),
-              ]
+              ],
             ],
           ),
         ),
@@ -483,11 +571,7 @@ class _AdminApplicationReviewScreenState
     );
   }
 
-  Widget _buildDetailRow(
-    String label,
-    String value, {
-    bool multiline = false,
-  }) {
+  Widget _buildDetailRow(String label, String value, {bool multiline = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -537,10 +621,14 @@ class _AdminApplicationReviewScreenState
   }
 
   Future<void> _updateApplicationStatus(
-      String applicationId, String newStatus) async {
+    String applicationId,
+    String newStatus,
+  ) async {
     try {
       await _applicationService.updateApplicationStatus(
-          applicationId, newStatus);
+        applicationId,
+        newStatus,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -548,8 +636,9 @@ class _AdminApplicationReviewScreenState
             content: Text(
               'Application ${newStatus == 'approved' ? 'approved' : 'rejected'} successfully',
             ),
-            backgroundColor:
-                newStatus == 'approved' ? Colors.green : Colors.red,
+            backgroundColor: newStatus == 'approved'
+                ? Colors.green
+                : Colors.red,
           ),
         );
         Navigator.pop(context);
@@ -557,10 +646,7 @@ class _AdminApplicationReviewScreenState
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error: $e'),
-            backgroundColor: Colors.red,
-          ),
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
         );
       }
     }
@@ -572,8 +658,10 @@ class _AdminApplicationReviewScreenState
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Resume'),
-        content: const Text('Resume link available. To implement full PDF viewing, '
-            'add a PDF viewer package like pdf or google_mlkit_document_scanner.'),
+        content: const Text(
+          'Resume link available. To implement full PDF viewing, '
+          'add a PDF viewer package like pdf or google_mlkit_document_scanner.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

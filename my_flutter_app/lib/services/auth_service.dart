@@ -21,10 +21,8 @@ class AuthService {
   }) async {
     try {
       // Create user with email and password
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       // Create user document in Firestore
       if (userCredential.user != null) {
@@ -39,6 +37,39 @@ class AuthService {
             .collection('users')
             .doc(userCredential.user!.uid)
             .set(newUser.toFirestore());
+      }
+
+      return userCredential;
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('An unexpected error occurred: $e');
+    }
+  }
+
+  // Sign up admin (creates auth user + admins doc)
+  Future<UserCredential?> signUpAdmin({
+    required String email,
+    required String password,
+    required String fullName,
+  }) async {
+    try {
+      // Create user with email and password
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
+
+      // Create admin document in Firestore (self-provision allowed by rules)
+      if (userCredential.user != null) {
+        await _firestore
+            .collection('admins')
+            .doc(userCredential.user!.uid)
+            .set({
+              'adminId': userCredential.user!.uid,
+              'email': email,
+              'role': 'admin',
+              'createdAt': Timestamp.now(),
+              'fullName': fullName,
+            });
       }
 
       return userCredential;

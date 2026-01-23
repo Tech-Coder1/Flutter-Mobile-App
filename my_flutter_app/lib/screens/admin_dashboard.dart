@@ -6,6 +6,7 @@ import '../services/course_service.dart';
 import '../services/internship_service.dart';
 import '../services/application_service.dart';
 import '../services/admin_statistics_service.dart';
+import '../services/admin_content_service.dart';
 import '../models/activity_log_model.dart';
 
 class AdminDashboard extends StatefulWidget {
@@ -22,6 +23,36 @@ class _AdminDashboardState extends State<AdminDashboard> {
   final internshipService = InternshipService();
   final applicationService = ApplicationService();
   final adminStatisticsService = AdminStatisticsService();
+  final adminContentService = AdminContentService();
+
+  // Quick add controllers
+  final _courseTitleController = TextEditingController();
+  final _courseDurationController = TextEditingController();
+  final _courseLevelController = TextEditingController();
+  final _courseDescriptionController = TextEditingController();
+
+  final _internRoleController = TextEditingController();
+  final _internCompanyController = TextEditingController();
+  final _internLocationController = TextEditingController();
+  final _internTypeController = TextEditingController();
+  final _internDescriptionController = TextEditingController();
+
+  bool _creatingCourse = false;
+  bool _creatingInternship = false;
+
+  @override
+  void dispose() {
+    _courseTitleController.dispose();
+    _courseDurationController.dispose();
+    _courseLevelController.dispose();
+    _courseDescriptionController.dispose();
+    _internRoleController.dispose();
+    _internCompanyController.dispose();
+    _internLocationController.dispose();
+    _internTypeController.dispose();
+    _internDescriptionController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,16 +80,16 @@ class _AdminDashboardState extends State<AdminDashboard> {
             Text(
               'Platform Analytics',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF1A1A1A),
-                  ),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF1A1A1A),
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'Real-time dashboard metrics and insights',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: const Color(0xFF6B7280),
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: const Color(0xFF6B7280)),
             ),
             const SizedBox(height: 32),
 
@@ -101,9 +132,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
             // Application Status Overview
             Text(
               'Application Status',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             Row(
@@ -138,9 +169,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
             // Enrollment Trend Chart
             Text(
               'Enrollment Trend (Last 6 Months)',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             Card(
@@ -169,13 +200,14 @@ class _AdminDashboardState extends State<AdminDashboard> {
                       child: BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
-                          maxY: (trendData
+                          maxY:
+                              (trendData
                                   .fold<int>(
-                                      0,
-                                      (max, item) =>
-                                          item.enrollments > max
-                                              ? item.enrollments
-                                              : max)
+                                    0,
+                                    (max, item) => item.enrollments > max
+                                        ? item.enrollments
+                                        : max,
+                                  )
                                   .toDouble() +
                               10),
                           barTouchData: BarTouchData(enabled: true),
@@ -239,9 +271,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
             // Recent Activity Feed
             Text(
               'Recent Activity',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             StreamBuilder<List<ActivityLogModel>>(
@@ -275,18 +307,46 @@ class _AdminDashboardState extends State<AdminDashboard> {
             ),
             const SizedBox(height: 32),
 
+            // Content creation shortcuts
+            Text(
+              'Add Content',
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 16),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > 900;
+                return Flex(
+                  direction: isWide ? Axis.horizontal : Axis.vertical,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: _buildCreateCourseCard()),
+                    if (isWide)
+                      const SizedBox(width: 16)
+                    else
+                      const SizedBox(height: 16),
+                    Expanded(child: _buildCreateInternshipCard()),
+                  ],
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+
             // Admin Actions
             Text(
               'Quick Actions',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 16),
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/admin_application_review'),
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/admin_application_review'),
                 icon: const Icon(Icons.assessment_outlined),
                 label: const Text('Review Applications'),
                 style: ElevatedButton.styleFrom(
@@ -300,7 +360,8 @@ class _AdminDashboardState extends State<AdminDashboard> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: () => Navigator.pushNamed(context, '/admin_support_tickets'),
+                onPressed: () =>
+                    Navigator.pushNamed(context, '/admin_support_tickets'),
                 icon: const Icon(Icons.support_agent_outlined),
                 label: const Text('View Support Tickets'),
                 style: ElevatedButton.styleFrom(
@@ -341,9 +402,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
             const SizedBox(height: 12),
             Text(
               title,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: const Color(0xFF6B7280),
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: const Color(0xFF6B7280)),
             ),
             const SizedBox(height: 8),
             FutureBuilder<int>(
@@ -511,6 +572,232 @@ class _AdminDashboardState extends State<AdminDashboard> {
     } catch (e) {
       debugPrint('Error counting applications: $e');
       return 0;
+    }
+  }
+
+  Widget _buildCreateCourseCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Create Course',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Icon(Icons.book_outlined, color: Color(0xFF4169E1)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _courseTitleController,
+              decoration: const InputDecoration(labelText: 'Title'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _courseDurationController,
+              decoration: const InputDecoration(
+                labelText: 'Duration (e.g., 6 weeks)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _courseLevelController,
+              decoration: const InputDecoration(
+                labelText: 'Level (Beginner / Intermediate / Advanced)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _courseDescriptionController,
+              decoration: const InputDecoration(labelText: 'Short description'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _creatingCourse ? null : _handleCreateCourse,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: const Color(0xFF4169E1),
+                  foregroundColor: Colors.white,
+                ),
+                child: _creatingCourse
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Publish Course'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleCreateCourse() async {
+    if (_courseTitleController.text.trim().isEmpty ||
+        _courseDurationController.text.trim().isEmpty ||
+        _courseLevelController.text.trim().isEmpty ||
+        _courseDescriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all course fields')),
+      );
+      return;
+    }
+
+    setState(() => _creatingCourse = true);
+    try {
+      await adminContentService.createCourse(
+        title: _courseTitleController.text.trim(),
+        duration: _courseDurationController.text.trim(),
+        level: _courseLevelController.text.trim(),
+        description: _courseDescriptionController.text.trim(),
+        createdBy: authService.currentUser?.uid ?? 'admin',
+      );
+
+      _courseTitleController.clear();
+      _courseDurationController.clear();
+      _courseLevelController.clear();
+      _courseDescriptionController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Course created successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to create course: $e')));
+    } finally {
+      if (mounted) setState(() => _creatingCourse = false);
+    }
+  }
+
+  Widget _buildCreateInternshipCard() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Create Internship',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const Icon(Icons.work_outline, color: Color(0xFF51CF66)),
+              ],
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _internRoleController,
+              decoration: const InputDecoration(labelText: 'Role'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _internCompanyController,
+              decoration: const InputDecoration(labelText: 'Company'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _internLocationController,
+              decoration: const InputDecoration(labelText: 'Location'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _internTypeController,
+              decoration: const InputDecoration(
+                labelText: 'Type (Remote / Onsite / Hybrid)',
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _internDescriptionController,
+              decoration: const InputDecoration(labelText: 'Short description'),
+              maxLines: 3,
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _creatingInternship ? null : _handleCreateInternship,
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: const Color(0xFF51CF66),
+                  foregroundColor: Colors.white,
+                ),
+                child: _creatingInternship
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text('Publish Internship'),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _handleCreateInternship() async {
+    if (_internRoleController.text.trim().isEmpty ||
+        _internCompanyController.text.trim().isEmpty ||
+        _internLocationController.text.trim().isEmpty ||
+        _internTypeController.text.trim().isEmpty ||
+        _internDescriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all internship fields')),
+      );
+      return;
+    }
+
+    setState(() => _creatingInternship = true);
+    try {
+      await adminContentService.createInternship(
+        role: _internRoleController.text.trim(),
+        company: _internCompanyController.text.trim(),
+        location: _internLocationController.text.trim(),
+        type: _internTypeController.text.trim(),
+        description: _internDescriptionController.text.trim(),
+        postedBy: authService.currentUser?.uid ?? 'admin',
+      );
+
+      _internRoleController.clear();
+      _internCompanyController.clear();
+      _internLocationController.clear();
+      _internTypeController.clear();
+      _internDescriptionController.clear();
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Internship created successfully')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create internship: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _creatingInternship = false);
     }
   }
 }

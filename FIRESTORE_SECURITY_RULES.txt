@@ -28,10 +28,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
     
-    // Admins collection - only admins can read, only system can write
+    // Admins collection - allow self-provisioning of admin doc for the authenticated user
     match /admins/{adminId} {
       allow read: if isAdmin() || isUserOwner(adminId);
-      allow write: if false; // Admins are created via Firebase Console or custom claims
+      allow create: if isAuthenticated() && request.auth.uid == adminId;
+      allow update, delete: if false; // Prevent edits/deletes from clients
     }
     
     // Courses collection - authenticated users can read all, only admins can write

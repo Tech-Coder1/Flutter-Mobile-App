@@ -4,12 +4,14 @@ class AdminModel {
   final String adminId;
   final String email;
   final String role;
+  final String? fullName;
   final DateTime createdAt;
 
   AdminModel({
     required this.adminId,
     required this.email,
     required this.role,
+    this.fullName,
     required this.createdAt,
   });
 
@@ -20,6 +22,7 @@ class AdminModel {
       adminId: doc.id,
       email: data['email'] ?? '',
       role: data['role'] ?? 'admin',
+      fullName: data['fullName'],
       createdAt: (data['createdAt'] as Timestamp).toDate(),
     );
   }
@@ -29,6 +32,7 @@ class AdminModel {
     return AdminModel(
       adminId: json['adminId'] ?? '',
       email: json['email'] ?? '',
+      fullName: json['fullName'],
       role: json['role'] ?? 'admin',
       createdAt: json['createdAt'] is Timestamp
           ? (json['createdAt'] as Timestamp).toDate()
@@ -42,6 +46,7 @@ class AdminModel {
       'adminId': adminId,
       'email': email,
       'role': role,
+      'fullName': fullName,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -51,6 +56,7 @@ class AdminModel {
     return {
       'email': email,
       'role': role,
+      if (fullName != null) 'fullName': fullName,
       'createdAt': Timestamp.fromDate(createdAt),
     };
   }
@@ -60,12 +66,14 @@ class AdminModel {
     String? adminId,
     String? email,
     String? role,
+    String? fullName,
     DateTime? createdAt,
   }) {
     return AdminModel(
       adminId: adminId ?? this.adminId,
       email: email ?? this.email,
       role: role ?? this.role,
+      fullName: fullName ?? this.fullName,
       createdAt: createdAt ?? this.createdAt,
     );
   }
