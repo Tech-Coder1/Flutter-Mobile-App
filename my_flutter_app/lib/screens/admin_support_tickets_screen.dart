@@ -65,7 +65,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
         children: [
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -79,7 +79,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedPriority,
+              initialValue: _selectedPriority,
               decoration: const InputDecoration(labelText: 'Priority'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -137,7 +137,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.15),
+                      color: statusColor.withValues(alpha:0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -312,7 +312,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: isMine
-                                  ? const Color(0xFF4169E1).withOpacity(0.12)
+                                  ? const Color(0xFF4169E1).withValues(alpha:0.12)
                                   : Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -422,7 +422,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha:0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
@@ -440,7 +440,7 @@ class _AdminSupportTicketsScreenState extends State<AdminSupportTicketsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.blue.withOpacity(0.12),
+        color: Colors.blue.withValues(alpha:0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

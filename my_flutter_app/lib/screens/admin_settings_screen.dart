@@ -157,7 +157,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4169E1).withOpacity(0.1),
+                    color: const Color(0xFF4169E1).withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(40),
                   ),
                   child: Center(
@@ -196,7 +196,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
                           vertical: 4,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF4169E1).withOpacity(0.1),
+                          color: const Color(0xFF4169E1).withValues(alpha:0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: const Text(
@@ -452,7 +452,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
       subtitle: Text(subtitle),
       value: value,
       onChanged: onChanged,
-      activeColor: const Color(0xFF4169E1),
+      activeThumbColor: const Color(0xFF4169E1),
     );
   }
 

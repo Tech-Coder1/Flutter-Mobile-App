@@ -11,7 +11,6 @@ import 'screens/courses_screen.dart';
 import 'screens/internships_screen.dart';
 import 'screens/application_form.dart';
 import 'screens/profile_screen.dart';
-import 'screens/admin_dashboard.dart';
 import 'screens/admin_dashboard_new.dart';
 import 'screens/admin_courses_screen.dart';
 import 'screens/admin_internships_screen.dart';

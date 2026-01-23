@@ -250,7 +250,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF4169E1).withOpacity(0.1),
+                    color: const Color(0xFF4169E1).withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Center(
@@ -329,32 +329,6 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
     );
   }
 
-  Widget _buildRoleBadge(String role) {
-    final isAdmin = role == 'admin';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: isAdmin
-            ? const Color(0xFF4169E1).withOpacity(0.1)
-            : Colors.grey[200],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isAdmin
-              ? const Color(0xFF4169E1).withOpacity(0.3)
-              : Colors.grey[400]!,
-        ),
-      ),
-      child: Text(
-        isAdmin ? 'Admin' : 'Student',
-        style: TextStyle(
-          color: isAdmin ? const Color(0xFF4169E1) : Colors.grey[700],
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
   void _showUserDetails(UserModel user) {
     showDialog(
       context: context,
@@ -373,7 +347,7 @@ class _AdminUsersScreenState extends State<AdminUsersScreen> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4169E1).withOpacity(0.1),
+                      color: const Color(0xFF4169E1).withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Center(

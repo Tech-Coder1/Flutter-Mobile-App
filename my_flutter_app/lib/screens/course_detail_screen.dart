@@ -122,7 +122,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha:0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -140,7 +140,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.2),
+                          color: Colors.white.withValues(alpha:0.2),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
@@ -167,7 +167,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                           ),
                           itemCount: 5,
                           itemSize: 18,
-                          unratedColor: Colors.white.withOpacity(0.3),
+                          unratedColor: Colors.white.withValues(alpha:0.3),
                         ),
                         Text(
                           '${course.rating.toStringAsFixed(1)}/5.0',
@@ -233,7 +233,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                                 ),
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF4169E1)
-                                      .withOpacity(0.1),
+                                      .withValues(alpha:0.1),
                                   border: Border.all(
                                     color: const Color(0xFF4169E1),
                                   ),
@@ -271,7 +271,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4169E1).withOpacity(0.1),
+                      color: const Color(0xFF4169E1).withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -337,7 +337,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: const Color(0xFF4169E1).withOpacity(0.1),
+            color: const Color(0xFF4169E1).withValues(alpha:0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(

@@ -141,7 +141,7 @@ class _UserFeedbackScreenState extends State<UserFeedbackScreen> {
                           ),
                           const SizedBox(height: 12),
                           DropdownButtonFormField<String>(
-                            value: _category,
+                            initialValue: _category,
                             decoration: const InputDecoration(labelText: 'Category'),
                             items: const [
                               DropdownMenuItem(value: 'app', child: Text('App Experience')),

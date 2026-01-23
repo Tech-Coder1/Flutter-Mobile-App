@@ -75,7 +75,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
         children: [
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -89,7 +89,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedPriority,
+              initialValue: _selectedPriority,
               decoration: const InputDecoration(labelText: 'Priority'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -217,7 +217,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
                 children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: category,
+                      initialValue: category,
                       decoration: const InputDecoration(labelText: 'Category'),
                       items: const [
                         DropdownMenuItem(value: 'course_access', child: Text('Course Access')),
@@ -231,7 +231,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: priority,
+                      initialValue: priority,
                       decoration: const InputDecoration(labelText: 'Priority'),
                       items: const [
                         DropdownMenuItem(value: 'low', child: Text('Low')),

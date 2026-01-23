@@ -62,7 +62,7 @@ class _AdminFeedbackScreenState extends State<AdminFeedbackScreen> {
         children: [
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedStatus,
+              initialValue: _selectedStatus,
               decoration: const InputDecoration(labelText: 'Status'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -76,7 +76,7 @@ class _AdminFeedbackScreenState extends State<AdminFeedbackScreen> {
           const SizedBox(width: 12),
           Expanded(
             child: DropdownButtonFormField<String>(
-              value: _selectedCategory,
+              initialValue: _selectedCategory,
               decoration: const InputDecoration(labelText: 'Category'),
               items: const [
                 DropdownMenuItem(value: 'all', child: Text('All')),
@@ -130,7 +130,7 @@ class _AdminFeedbackScreenState extends State<AdminFeedbackScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.15),
+                      color: statusColor.withValues(alpha:0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -211,7 +211,7 @@ class _AdminFeedbackScreenState extends State<AdminFeedbackScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: _statusColor(fb.status).withOpacity(0.15),
+                      color: _statusColor(fb.status).withValues(alpha:0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import '../services/user_service.dart';
 import '../services/course_service.dart';
-import '../services/internship_service.dart';
 import '../services/application_service.dart';
 import '../widgets/admin_sidebar.dart';
 
@@ -16,7 +15,6 @@ class AdminAnalyticsScreen extends StatefulWidget {
 class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
   final _userService = UserService();
   final _courseService = CourseService();
-  final _internshipService = InternshipService();
   final _applicationService = ApplicationService();
 
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 90));
@@ -235,7 +233,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                         dotData: const FlDotData(show: true),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.blue.withOpacity(0.1),
+                          color: Colors.blue.withValues(alpha: 0.1),
                         ),
                       ),
                       LineChartBarData(
@@ -253,7 +251,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
                         dotData: const FlDotData(show: true),
                         belowBarData: BarAreaData(
                           show: true,
-                          color: Colors.green.withOpacity(0.1),
+                          color: Colors.green.withValues(alpha: 0.1),
                         ),
                       ),
                     ],

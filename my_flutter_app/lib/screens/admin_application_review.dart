@@ -232,7 +232,7 @@ class _AdminApplicationReviewScreenState
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF4169E1).withOpacity(0.1),
+                      color: const Color(0xFF4169E1).withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(24),
                     ),
                     child: Center(
@@ -275,9 +275,9 @@ class _AdminApplicationReviewScreenState
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.1),
+                      color: statusColor.withValues(alpha:0.1),
                       borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: statusColor.withOpacity(0.3)),
+                      border: Border.all(color: statusColor.withValues(alpha:0.3)),
                     ),
                     child: Row(
                       children: [
@@ -464,7 +464,7 @@ class _AdminApplicationReviewScreenState
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _getStatusColor(application.status).withOpacity(0.1),
+                  color: _getStatusColor(application.status).withValues(alpha:0.1),
                   border: Border.all(
                     color: _getStatusColor(application.status),
                   ),
