@@ -3,6 +3,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import '../models/course_model.dart';
 import '../services/course_service.dart';
 import '../services/auth_service.dart';
+import '../services/notification_service.dart';
+import '../services/progress_service.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final CourseModel course;
@@ -18,6 +20,8 @@ class CourseDetailScreen extends StatefulWidget {
 
 class _CourseDetailScreenState extends State<CourseDetailScreen> {
   final CourseService courseService = CourseService();
+  final NotificationService notificationService = NotificationService();
+  final ProgressService progressService = ProgressService();
   late CourseModel course;
   bool isEnrolled = false;
   bool isLoading = false;
@@ -48,23 +52,30 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       final currentUser = AuthService().currentUser;
       final userId = currentUser?.uid;
       if (userId != null) {
-        // Add user to enrolled list
-        final updatedCourse = course.copyWith(
-          enrolledUsers: [...course.enrolledUsers, userId],
+        // Use the proper service method that updates both course and user
+        await courseService.enrollUserInCourse(course.courseId, userId);
+        
+        // Start progress tracking
+        await progressService.startCourse(
+          userId: userId,
+          courseId: course.courseId,
+          totalVideos: course.syllabus.length,
         );
         
-        await courseService.updateCourse(course.courseId, updatedCourse.toFirestore());
+        // Send enrollment notification
+        await notificationService.sendEnrollmentNotification(
+          userId: userId,
+          courseTitle: course.title,
+        );
         
-        setState(() {
-          course = updatedCourse;
-          isEnrolled = true;
-        });
+        setState(() => isEnrolled = true);
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Enrolled successfully!'),
+              content: Text('Successfully enrolled in course!'),
               backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
             ),
           );
         }
@@ -73,8 +84,9 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Enrollment failed: ${e.toString()}'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 4),
           ),
         );
       }
