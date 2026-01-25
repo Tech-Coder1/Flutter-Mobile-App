@@ -190,12 +190,7 @@ class HomeScreen extends StatelessWidget {  Widget _progressSummaryCard(
             children: [
               IconButton(
                 icon: const Icon(Icons.notifications_outlined),
-                onPressed: () {
-                  // Show notifications - would typically show a bottom sheet or dialog
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('View all notifications')),
-                  );
-                },
+                onPressed: () => Navigator.pushNamed(context, '/inbox'),
               ),
               StreamBuilder<int>(
                 stream: notificationService.getUnreadNotificationCount(userId),
@@ -464,7 +459,7 @@ class HomeScreen extends StatelessWidget {  Widget _progressSummaryCard(
                 }
 
                 final notifications = snapshot.data ?? [];
-                final recentNotifications = notifications.take(3).toList();
+                final recentNotifications = notifications.take(5).toList();
 
                 if (recentNotifications.isEmpty) {
                   return Card(
