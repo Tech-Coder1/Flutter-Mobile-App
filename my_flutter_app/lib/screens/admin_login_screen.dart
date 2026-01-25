@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/auth_service.dart';
 
 class AdminLoginScreen extends StatefulWidget {
   const AdminLoginScreen({super.key});
@@ -11,13 +12,13 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _authService = AuthService();
+  bool _isLoading = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Admin Portal'),
-      ),
+      appBar: AppBar(title: const Text('Admin Portal')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
@@ -25,25 +26,21 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 40),
-              const Icon(
-                Icons.shield,
-                size: 80,
-                color: Color(0xFF4169E1),
-              ),
+              const Icon(Icons.shield, size: 80, color: Color(0xFF4169E1)),
               const SizedBox(height: 24),
               Text(
                 'Admin Portal',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF1A1A1A),
-                    ),
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1A1A1A),
+                ),
               ),
               const SizedBox(height: 8),
               Text(
                 'Secure access for administrators',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: const Color(0xFF6B7280),
-                    ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyLarge?.copyWith(color: const Color(0xFF6B7280)),
               ),
               const SizedBox(height: 40),
               Card(
@@ -84,16 +81,54 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                         ),
                         const SizedBox(height: 24),
                         ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              Navigator.pushReplacementNamed(context, '/admin_dashboard');
-                            }
-                          },
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  if (_formKey.currentState!.validate()) {
+                                    setState(() => _isLoading = true);
+                                    try {
+                                      await _authService.signInAdmin(
+                                        email: _emailController.text.trim(),
+                                        password: _passwordController.text,
+                                      );
+                                      if (mounted) {
+                                        Navigator.pushReplacementNamed(
+                                          context,
+                                          '/admin_dashboard',
+                                        );
+                                      }
+                                    } catch (e) {
+                                      if (mounted) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(e.toString()),
+                                            backgroundColor: Colors.red,
+                                          ),
+                                        );
+                                      }
+                                    } finally {
+                                      if (mounted) {
+                                        setState(() => _isLoading = false);
+                                      }
+                                    }
+                                  }
+                                },
                           style: ElevatedButton.styleFrom(
                             minimumSize: const Size(double.infinity, 50),
                             backgroundColor: const Color(0xFF1A1A1A),
                           ),
-                          child: const Text('Access Dashboard'),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Text('Access Dashboard'),
                         ),
                       ],
                     ),
@@ -101,6 +136,22 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                 ),
               ),
               const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text('Don\'t have an admin account? '),
+                  TextButton(
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/admin_signup');
+                    },
+                    child: const Text(
+                      'Register',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
               TextButton(
                 onPressed: () {
                   Navigator.pop(context);

@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
+
+# Flutter/Dart
+**/.dart_tool/
+**/.packages
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.gradle/
+**/.idea/
+
+# iOS
+**/Pods/
+**/DerivedData/
+**/*.xcworkspace/xcshareddata/WorkspaceSettings.xcsettings
+**/Runner.xcworkspace/xcshareddata/
+**/Runner.xcodeproj/project.xcworkspace/
+**/Runner.xcodeproj/xcshareddata/
+
+# Android
+**/.cxx/
+**/.externalNativeBuild/
+**/local.properties
+
+# Web
+**/.firebase/
+
+# Logs
+**/*.log

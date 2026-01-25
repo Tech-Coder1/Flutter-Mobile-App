@@ -31,6 +31,26 @@
 
   <title>my_flutter_app</title>
   <link rel="manifest" href="manifest.json">
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-storage-compat.js"></script>
+  
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDhhpUv4oili2S4jkEoR1YyQ_IbUBzxKqQ",
+      authDomain: "excelerate-app-4b169.firebaseapp.com",
+      projectId: "excelerate-app-4b169",
+      storageBucket: "excelerate-app-4b169.firebasestorage.app",
+      messagingSenderId: "37077923691",
+      appId: "1:37077923691:web:7a35d9f948286f74affe2e",
+      measurementId: "G-N6DHPEDZWP"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
