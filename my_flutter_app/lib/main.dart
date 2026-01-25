@@ -143,7 +143,11 @@ class ExcelerateApp extends StatelessWidget {
         '/user_dashboard': (context) => const RequireAuth(child: UserDashboard()),
         '/courses': (context) => const RequireAuth(child: CoursesScreen()),
         '/internships': (context) => const RequireAuth(child: InternshipsScreen()),
-        '/application_form': (context) => const RequireAuth(child: ApplicationForm()),
+        '/application_form': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final internshipArg = args is InternshipModel ? args : null;
+          return RequireAuth(child: ApplicationForm(internship: internshipArg));
+        },
         '/profile': (context) => const RequireAuth(child: ProfileScreen()),
         '/admin_dashboard': (context) => const AdminDashboardNew(),
         '/admin_courses': (context) => const AdminCoursesScreen(),
