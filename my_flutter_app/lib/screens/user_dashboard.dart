@@ -267,7 +267,7 @@ class HomeScreen extends StatelessWidget {  Widget _progressSummaryCard(
                     builder: (context, snapshot) {
                       final count = snapshot.data ?? 0;
                       return GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/courses_screen'),
+                        onTap: () => Navigator.pushNamed(context, '/courses'),
                         child: Card(
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
@@ -307,7 +307,7 @@ class HomeScreen extends StatelessWidget {  Widget _progressSummaryCard(
                     builder: (context, snapshot) {
                       final count = snapshot.data ?? 0;
                       return GestureDetector(
-                        onTap: () => Navigator.pushNamed(context, '/internships_screen'),
+                        onTap: () => Navigator.pushNamed(context, '/internships'),
                         child: Card(
                           child: Padding(
                             padding: const EdgeInsets.all(20.0),
