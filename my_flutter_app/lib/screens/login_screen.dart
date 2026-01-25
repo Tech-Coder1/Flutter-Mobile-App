@@ -172,6 +172,33 @@ class _LoginScreenState extends State<LoginScreen> {
                                 )
                               : const Text('Log In'),
                         ),
+                        const SizedBox(height: 12),
+                        OutlinedButton.icon(
+                          onPressed: _isLoading
+                              ? null
+                              : () async {
+                                  setState(() => _isLoading = true);
+                                  try {
+                                    await _authService.signInWithGoogle();
+                                    if (mounted) {
+                                      Navigator.pushReplacementNamed(context, '/user_dashboard');
+                                    }
+                                  } catch (e) {
+                                    if (mounted) {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        SnackBar(
+                                          content: Text(e.toString()),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
+                                  } finally {
+                                    if (mounted) setState(() => _isLoading = false);
+                                  }
+                                },
+                          icon: const Icon(Icons.login),
+                          label: const Text('Continue with Google'),
+                        ),
                       ],
                     ),
                   ),
