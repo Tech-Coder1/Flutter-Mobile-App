@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/user_model.dart';
 import '../models/admin_model.dart';
@@ -95,6 +96,27 @@ class AuthService {
       throw _handleAuthException(e);
     } catch (e) {
       throw Exception('An unexpected error occurred: $e');
+    }
+  }
+
+  // Sign in with Google (Web + supported platforms)
+  Future<UserCredential?> signInWithGoogle() async {
+    try {
+      final googleProvider = GoogleAuthProvider();
+      googleProvider.addScope('email');
+      googleProvider.setCustomParameters({'prompt': 'select_account'});
+
+      // For Web, use signInWithPopup; for others, use signInWithProvider
+      if (kIsWeb) {
+        // ignore: deprecated_member_use
+        return await _auth.signInWithPopup(googleProvider);
+      } else {
+        return await _auth.signInWithProvider(googleProvider);
+      }
+    } on FirebaseAuthException catch (e) {
+      throw _handleAuthException(e);
+    } catch (e) {
+      throw Exception('Google sign-in failed: $e');
     }
   }
 

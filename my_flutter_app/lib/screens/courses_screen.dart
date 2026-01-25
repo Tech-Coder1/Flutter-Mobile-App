@@ -20,6 +20,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
 
   String _searchQuery = '';
   String _selectedLevel = 'All';
+  String? _busyCourseId;
 
   @override
   void dispose() {
@@ -240,12 +241,24 @@ class _CoursesScreenState extends State<CoursesScreen> {
                                   const SizedBox(width: 12),
                                   Expanded(
                                     child: ElevatedButton(
-                                      onPressed: isEnrolled ? null : () => _enrollInCourse(course),
+                                      onPressed: (isEnrolled || _busyCourseId == course.courseId)
+                                          ? null
+                                          : () => _enrollInCourse(course),
                                       style: ElevatedButton.styleFrom(
-                                        backgroundColor:
-                                            isEnrolled ? Colors.grey : const Color(0xFF4169E1),
+                                        backgroundColor: (isEnrolled || _busyCourseId == course.courseId)
+                                            ? Colors.grey
+                                            : const Color(0xFF4169E1),
                                       ),
-                                      child: Text(isEnrolled ? 'Enrolled' : 'Enroll Now'),
+                                      child: _busyCourseId == course.courseId
+                                          ? const SizedBox(
+                                              height: 18,
+                                              width: 18,
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2,
+                                                color: Colors.white,
+                                              ),
+                                            )
+                                          : Text(isEnrolled ? 'Enrolled' : 'Enroll Now'),
                                     ),
                                   ),
                                 ],
@@ -279,6 +292,7 @@ class _CoursesScreenState extends State<CoursesScreen> {
     }
 
     try {
+      setState(() => _busyCourseId = course.courseId);
       await _courseService.enrollUserInCourse(course.courseId, userId);
       await _notificationService.sendEnrollmentNotification(
         userId: userId,
@@ -301,6 +315,9 @@ class _CoursesScreenState extends State<CoursesScreen> {
           ),
         );
       }
+    }
+    finally {
+      if (mounted) setState(() => _busyCourseId = null);
     }
   }
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/course_model.dart';
+import 'enrollment_service.dart';
 
 class CourseService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -84,15 +85,23 @@ class CourseService {
   // Enroll user in course
   Future<void> enrollUserInCourse(String courseId, String userId) async {
     try {
+      final enrollmentService = EnrollmentService();
+      final already = await enrollmentService.isEnrolled(userId, courseId);
+      if (already) return;
+
+      // Create enrollment doc first to ensure uniqueness
+      await enrollmentService.createEnrollment(userId, courseId);
+
+      // Then update aggregates for quick UI checks
       await _firestore.runTransaction((transaction) async {
         // Add user to course's enrolledUsers
-        DocumentReference courseRef = _firestore.collection(_collection).doc(courseId);
+        final courseRef = _firestore.collection(_collection).doc(courseId);
         transaction.update(courseRef, {
           'enrolledUsers': FieldValue.arrayUnion([userId])
         });
 
         // Add course to user's enrolledCourses
-        DocumentReference userRef = _firestore.collection('users').doc(userId);
+        final userRef = _firestore.collection('users').doc(userId);
         transaction.update(userRef, {
           'enrolledCourses': FieldValue.arrayUnion([courseId])
         });

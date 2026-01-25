@@ -10,6 +10,7 @@ class InternshipModel {
   final String jobDescription;
   final List<String> requirements;
   final List<String> benefits;
+  final bool isOpen;
   final int applicantsCount;
   final int activeInterns;
   final int waitlist;
@@ -26,6 +27,7 @@ class InternshipModel {
     this.jobDescription = '',
     this.requirements = const [],
     this.benefits = const [],
+    this.isOpen = true,
     this.applicantsCount = 0,
     this.activeInterns = 0,
     this.waitlist = 0,
@@ -46,6 +48,7 @@ class InternshipModel {
       jobDescription: data['jobDescription'] ?? '',
       requirements: List<String>.from(data['requirements'] ?? []),
       benefits: List<String>.from(data['benefits'] ?? []),
+      isOpen: data['isOpen'] ?? true,
       applicantsCount: data['applicantsCount'] ?? 0,
       activeInterns: data['activeInterns'] ?? 0,
       waitlist: data['waitlist'] ?? 0,
@@ -66,6 +69,7 @@ class InternshipModel {
       jobDescription: json['jobDescription'] ?? '',
       requirements: List<String>.from(json['requirements'] ?? []),
       benefits: List<String>.from(json['benefits'] ?? []),
+      isOpen: json['isOpen'] ?? true,
       applicantsCount: json['applicantsCount'] ?? 0,
       activeInterns: json['activeInterns'] ?? 0,
       waitlist: json['waitlist'] ?? 0,
@@ -88,6 +92,7 @@ class InternshipModel {
       'jobDescription': jobDescription,
       'requirements': requirements,
       'benefits': benefits,
+      'isOpen': isOpen,
       'applicantsCount': applicantsCount,
       'activeInterns': activeInterns,
       'waitlist': waitlist,
@@ -107,6 +112,7 @@ class InternshipModel {
       'jobDescription': jobDescription,
       'requirements': requirements,
       'benefits': benefits,
+      'isOpen': isOpen,
       'applicantsCount': applicantsCount,
       'activeInterns': activeInterns,
       'waitlist': waitlist,
@@ -126,6 +132,7 @@ class InternshipModel {
     String? jobDescription,
     List<String>? requirements,
     List<String>? benefits,
+    bool? isOpen,
     int? applicantsCount,
     int? activeInterns,
     int? waitlist,
@@ -142,6 +149,7 @@ class InternshipModel {
       jobDescription: jobDescription ?? this.jobDescription,
       requirements: requirements ?? this.requirements,
       benefits: benefits ?? this.benefits,
+      isOpen: isOpen ?? this.isOpen,
       applicantsCount: applicantsCount ?? this.applicantsCount,
       activeInterns: activeInterns ?? this.activeInterns,
       waitlist: waitlist ?? this.waitlist,

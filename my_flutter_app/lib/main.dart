@@ -24,8 +24,10 @@ import 'screens/admin_support_tickets_screen.dart';
 import 'screens/internship_detail_screen.dart';
 import 'screens/user_feedback_screen.dart';
 import 'screens/admin_feedback_screen.dart';
+import 'screens/inbox_screen.dart';
 import 'models/course_model.dart';
 import 'models/internship_model.dart';
+import 'widgets/require_auth.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -50,6 +52,7 @@ class ExcelerateApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Excelerate',
+      builder: (context, child) => SelectionArea(child: child ?? const SizedBox()),
       theme: ThemeData(
         primaryColor: const Color(0xFF4169E1), // Soft royal blue
         scaffoldBackgroundColor: Colors.white,
@@ -137,11 +140,15 @@ class ExcelerateApp extends StatelessWidget {
         '/signup': (context) => const SignupScreen(),
         '/admin_login': (context) => const AdminLoginScreen(),
         '/admin_signup': (context) => const AdminSignupScreen(),
-        '/user_dashboard': (context) => const UserDashboard(),
-        '/courses': (context) => const CoursesScreen(),
-        '/internships': (context) => const InternshipsScreen(),
-        '/application_form': (context) => const ApplicationForm(),
-        '/profile': (context) => const ProfileScreen(),
+        '/user_dashboard': (context) => const RequireAuth(child: UserDashboard()),
+        '/courses': (context) => const RequireAuth(child: CoursesScreen()),
+        '/internships': (context) => const RequireAuth(child: InternshipsScreen()),
+        '/application_form': (context) {
+          final args = ModalRoute.of(context)?.settings.arguments;
+          final internshipArg = args is InternshipModel ? args : null;
+          return RequireAuth(child: ApplicationForm(internship: internshipArg));
+        },
+        '/profile': (context) => const RequireAuth(child: ProfileScreen()),
         '/admin_dashboard': (context) => const AdminDashboardNew(),
         '/admin_courses': (context) => const AdminCoursesScreen(),
         '/admin_internships': (context) => const AdminInternshipsScreen(),
@@ -153,14 +160,14 @@ class ExcelerateApp extends StatelessWidget {
         '/course_detail': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           if (args is CourseModel) {
-            return CourseDetailScreen(course: args);
+            return RequireAuth(child: CourseDetailScreen(course: args));
           }
           return const Scaffold(body: Center(child: Text('No course found')));
         },
         '/internship_detail': (context) {
           final args = ModalRoute.of(context)?.settings.arguments;
           if (args is InternshipModel) {
-            return InternshipDetailScreen(internship: args);
+            return RequireAuth(child: InternshipDetailScreen(internship: args));
           }
           return const Scaffold(
             body: Center(child: Text('No internship found')),
@@ -171,6 +178,7 @@ class ExcelerateApp extends StatelessWidget {
             const AdminSupportTicketsScreen(),
         '/feedback': (context) => const UserFeedbackScreen(),
         '/admin_feedback': (context) => const AdminFeedbackScreen(),
+        '/inbox': (context) => const RequireAuth(child: InboxScreen()),
       },
     );
   }

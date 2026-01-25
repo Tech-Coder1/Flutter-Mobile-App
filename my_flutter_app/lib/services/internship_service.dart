@@ -5,10 +5,11 @@ class InternshipService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'internships';
 
-  // Get all internships
+  // Get open internships only
   Stream<List<InternshipModel>> getAllInternships() {
     return _firestore
         .collection(_collection)
+        .where('isOpen', isEqualTo: true)
         .orderBy('postedAt', descending: true)
         .snapshots()
         .map((snapshot) => snapshot.docs
