@@ -1,14 +1,6 @@
-# Excelerate - Career Growth Mobile App
+# Excelerate - Career Growth Mobile App (Week 1)
 
 A modern, professional Flutter mobile application designed to help users accelerate their career growth through learning and internships. Features role-based access for both learners and administrators, with comprehensive Firebase integration, resume management, and feedback systems.
-
-## 📅 Development Progress
-
-- **[WEEK1_README.md](WEEK1_README.md)** - Foundation & UI (January 22, 2026)
-  - Core features, screens, design system, and setup guide
-  
-- **[WEEK2_README.md](WEEK2_README.md)** - API Architecture & Backend (January 26, 2026)
-  - Complete API documentation, Firebase integration patterns, real-time data synchronization, and how it works
 
 ## 🎯 Latest Updates (January 22, 2026)
 
@@ -148,16 +140,6 @@ lib/
 │   ├── notification_service.dart     # Notification handling
 │   └── user_service.dart             # User service layer
 └── widgets/                           # Reusable UI components
-```
-│   ├── signup_screen.dart        # User registration
-│   ├── admin_login_screen.dart   # Admin authentication
-│   ├── user_dashboard.dart       # Main dashboard with bottom nav
-│   ├── courses_screen.dart       # Course listing and enrollment
-│   ├── internships_screen.dart   # Internship opportunities
-│   ├── application_form.dart     # Internship application form
-│   ├── profile_screen.dart       # User profile and settings
-│   └── admin_dashboard.dart      # Admin management panel
-└── widgets/                 # Reusable UI components
 ```
 
 ## 📱 Modules & Screens
@@ -342,32 +324,6 @@ The app includes comprehensive UI mockups showing all screens and features. Scre
 - ![Profile](screenshots/profile_screen.png)
 - ![Admin Dashboard](screenshots/admin_dashboard.png)
 
-### App Flow Screenshots
-- ![Complete User Journey](screenshots/user_journey_flow.png)
-- ![Admin Panel Overview](screenshots/admin_overview.png)
-
-*Note: Add your actual screenshots to the `screenshots/` folder and update the filenames accordingly.*
-
-### 📱 How to Add Screenshots
-
-1. **Run the app** in Chrome: `flutter run -d chrome`
-2. **Navigate through all screens** and features
-3. **Take screenshots** using your browser's screenshot tool or keyboard shortcuts
-4. **Save images** to the `screenshots/` folder with descriptive names
-5. **Update README** with correct filenames
-6. **Commit and push** the new screenshots
-
-**Recommended Screenshot Names:**
-- `login_screen.png` - User login interface
-- `onboarding_screen.png` - Post-login introduction
-- `user_dashboard.png` - Main dashboard with navigation
-- `courses_screen.png` - Course catalog
-- `internships_screen.png` - Internship listings
-- `application_form.png` - Internship application form
-- `profile_screen.png` - User profile page
-- `admin_login_screen.png` - Administrator login
-- `admin_dashboard.png` - Admin management panel
-
 ## 🔧 Development
 
 ### Code Structure
@@ -376,15 +332,6 @@ The app includes comprehensive UI mockups showing all screens and features. Scre
 - **Form Validation**: Comprehensive input validation
 - **Navigation**: Named routes for scalability
 - **State Management**: Ready for expansion (Provider/BLoC)
-
-### Key Dependencies
-```yaml
-dependencies:
-  flutter:
-    sdk: flutter
-  cupertino_icons: ^1.0.8
-  smooth_page_indicator: ^1.1.0
-```
 
 ## 📋 Features in Detail
 
@@ -415,22 +362,8 @@ dependencies:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-### Development Guidelines
-- Follow Flutter best practices
-- Use meaningful commit messages
-- Test on multiple devices
-- Maintain code documentation
-- Follow the existing design system
-
-
-## 🙏 Acknowledgments
-
-- Flutter team for the amazing framework
-- Material Design for UI inspiration
-- Open source community for tools and libraries
-
 ---
 
-**Last Updated**: January 19, 2026
+**Week 1 Completion**: January 22, 2026
 **Flutter Version**: 3.38.7
 **Dart Version**: 3.10.7
