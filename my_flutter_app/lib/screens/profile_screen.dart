@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
 import '../services/user_service.dart';
+import '../services/theme_service.dart';
 import '../models/user_model.dart';
 import 'certificates_screen.dart';
 
@@ -190,6 +192,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Card(
               child: Column(
                 children: [
+                  Consumer<ThemeService>(
+                    builder: (context, themeService, _) => ListTile(
+                      leading: Icon(
+                        themeService.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+                        color: const Color(0xFF6B7280),
+                      ),
+                      title: const Text('Dark Mode'),
+                      trailing: Switch(
+                        value: themeService.isDarkMode,
+                        onChanged: (_) => themeService.toggleTheme(),
+                        activeColor: const Color(0xFF4169E1),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined, color: Color(0xFF6B7280)),
                     title: const Text('Account Settings'),

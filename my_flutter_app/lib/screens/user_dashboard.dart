@@ -5,13 +5,18 @@ import '../services/course_service.dart';
 import '../services/internship_service.dart';
 import '../services/notification_service.dart';
 import '../services/progress_service.dart';
+import '../services/gamification_service.dart';
 import '../models/user_model.dart';
 import '../models/notification_model.dart';
 import '../models/course_model.dart';
 import '../models/progress_model.dart';
+import '../models/gamification_model.dart';
 import 'courses_screen.dart';
 import 'internships_screen.dart';
 import 'profile_screen.dart';
+import 'level_screen.dart';
+import 'badges_screen.dart';
+import 'leaderboard_screen.dart';
 
 class UserDashboard extends StatefulWidget {
   const UserDashboard({super.key});
@@ -242,6 +247,111 @@ class HomeScreen extends StatelessWidget {  Widget _progressSummaryCard(
                         fontWeight: FontWeight.bold,
                         color: const Color(0xFF1A1A1A),
                       ),
+                );
+              },
+            ),
+            const SizedBox(height: 32),
+            // Gamification Section
+            StreamBuilder<UserLevelModel>(
+              stream: GamificationService().getUserLevel(userId),
+              builder: (context, snapshot) {
+                final userLevel = snapshot.data;
+                if (userLevel == null) return const SizedBox.shrink();
+
+                final progress = userLevel.totalXP / userLevel.xpToNextLevel;
+                return Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Level ${userLevel.level}',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF4169E1),
+                                  ),
+                                ),
+                                Text(
+                                  userLevel.title,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const BadgesScreen()),
+                                  ),
+                                  icon: const Icon(Icons.workspace_premium_outlined),
+                                  tooltip: 'Badges',
+                                ),
+                                IconButton(
+                                  onPressed: () => Navigator.push(
+                                    context,
+                                    MaterialPageRoute(builder: (_) => const LeaderboardScreen()),
+                                  ),
+                                  icon: const Icon(Icons.leaderboard_outlined),
+                                  tooltip: 'Leaderboard',
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: LinearProgressIndicator(
+                            value: progress.clamp(0.0, 1.0),
+                            minHeight: 10,
+                            backgroundColor: Colors.grey[300],
+                            valueColor: const AlwaysStoppedAnimation<Color>(
+                              Color(0xFF4169E1),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${userLevel.totalXP} XP',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF6B7280),
+                              ),
+                            ),
+                            InkWell(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(builder: (_) => const LevelScreen()),
+                              ),
+                              child: Text(
+                                '${userLevel.xpToNextLevel - userLevel.totalXP} XP to next level',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF4169E1),
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             ),

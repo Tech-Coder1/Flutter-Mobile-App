@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:provider/provider.dart';
 import 'firebase_options.dart';
+import 'config/app_theme.dart';
+import 'services/theme_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
@@ -42,7 +45,12 @@ void main() async {
     debugPrint('Firebase initialization error: $e');
   }
 
-  runApp(const ExcelerateApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => ThemeService(),
+      child: const ExcelerateApp(),
+    ),
+  );
 }
 
 class ExcelerateApp extends StatelessWidget {
@@ -50,88 +58,14 @@ class ExcelerateApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeService = Provider.of<ThemeService>(context);
+    
     return MaterialApp(
       title: 'Excelerate',
-      theme: ThemeData(
-        primaryColor: const Color(0xFF4169E1), // Soft royal blue
-        scaffoldBackgroundColor: Colors.white,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4169E1),
-          brightness: Brightness.light,
-        ),
-        useMaterial3: true,
-        cardTheme: const CardThemeData(
-          color: Color(0xFFF8F9FA), // Light gray
-          elevation: 2,
-          shadowColor: Color(0x1A000000), // Subtle shadow
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(16)),
-          ),
-        ),
-        inputDecorationTheme: InputDecorationTheme(
-          filled: true,
-          fillColor: const Color(0xFFF8F9FA),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFF4169E1), width: 2),
-          ),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF4169E1),
-            foregroundColor: Colors.white,
-            elevation: 0,
-            shadowColor: Colors.transparent,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            textStyle: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
-            foregroundColor: const Color(0xFF4169E1),
-            textStyle: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.white,
-          foregroundColor: Color(0xFF1A1A1A),
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          titleTextStyle: TextStyle(
-            color: Color(0xFF1A1A1A),
-            fontSize: 20,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: Colors.white,
-          selectedItemColor: Color(0xFF4169E1),
-          unselectedItemColor: Color(0xFF6B7280),
-          elevation: 8,
-          type: BottomNavigationBarType.fixed,
-        ),
-      ),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: themeService.themeMode,
+      debugShowCheckedModeBanner: false,
       initialRoute: '/login',
       routes: {
         '/onboarding': (context) => const OnboardingScreen(),
