@@ -137,7 +137,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
-                      color: statusColor.withOpacity(0.15),
+                      color: statusColor.withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -273,8 +273,9 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
                       assignedTo: '',
                     );
 
+                    final nav = Navigator.of(context);
                     await _ticketService.createTicket(ticket);
-                    if (mounted) Navigator.pop(context);
+                    if (mounted) nav.pop();
                   },
                   child: const Text('Submit Ticket'),
                 ),
@@ -342,7 +343,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: _statusColor(ticket.status).withOpacity(0.1),
+                  color: _statusColor(ticket.status).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
@@ -385,7 +386,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
                             padding: const EdgeInsets.all(10),
                             decoration: BoxDecoration(
                               color: isMine
-                                  ? const Color(0xFF4169E1).withOpacity(0.12)
+                                  ? const Color(0xFF4169E1).withValues(alpha: 0.12)
                                   : Colors.grey[200],
                               borderRadius: BorderRadius.circular(10),
                             ),
@@ -495,7 +496,7 @@ class _UserSupportTicketsScreenState extends State<UserSupportTicketsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

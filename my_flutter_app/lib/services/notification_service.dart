@@ -121,6 +121,50 @@ class NotificationService {
     }
   }
 
+  // Send notification when application is approved
+  Future<void> sendApplicationApprovedNotification({
+    required String userId,
+    required String internshipRole,
+    String? additionalMessage,
+  }) async {
+    try {
+      NotificationModel notification = NotificationModel(
+        notificationId: '',
+        userId: userId,
+        title: 'Application Approved! 🎉',
+        message: 'Congratulations! Your application for $internshipRole has been approved.${additionalMessage != null ? ' $additionalMessage' : ''}',
+        type: 'application',
+        createdAt: DateTime.now(),
+      );
+
+      await createNotification(notification);
+    } catch (e) {
+      throw Exception('Error sending approval notification: $e');
+    }
+  }
+
+  // Send notification when application is rejected
+  Future<void> sendApplicationRejectedNotification({
+    required String userId,
+    required String internshipRole,
+    String? reason,
+  }) async {
+    try {
+      NotificationModel notification = NotificationModel(
+        notificationId: '',
+        userId: userId,
+        title: 'Application Status Update',
+        message: 'Unfortunately, your application for $internshipRole was not successful at this time.${reason != null ? ' $reason' : ' Please keep looking for other opportunities!'}',
+        type: 'application',
+        createdAt: DateTime.now(),
+      );
+
+      await createNotification(notification);
+    } catch (e) {
+      throw Exception('Error sending rejection notification: $e');
+    }
+  }
+
   // Send notification when course enrollment is successful
   Future<void> sendEnrollmentNotification({
     required String userId,
@@ -139,6 +183,48 @@ class NotificationService {
       await createNotification(notification);
     } catch (e) {
       throw Exception('Error sending notification: $e');
+    }
+  }
+
+  // Send notification when course is completed
+  Future<void> sendCourseCompletionNotification({
+    required String userId,
+    required String courseTitle,
+  }) async {
+    try {
+      NotificationModel notification = NotificationModel(
+        notificationId: '',
+        userId: userId,
+        title: 'Course Completed! 🎓',
+        message: 'Congratulations! You have completed $courseTitle. Check your certificates.',
+        type: 'course',
+        createdAt: DateTime.now(),
+      );
+
+      await createNotification(notification);
+    } catch (e) {
+      throw Exception('Error sending completion notification: $e');
+    }
+  }
+
+  // Send notification when feedback is responded to
+  Future<void> sendFeedbackResponseNotification({
+    required String userId,
+    required String feedbackTitle,
+  }) async {
+    try {
+      NotificationModel notification = NotificationModel(
+        notificationId: '',
+        userId: userId,
+        title: 'Feedback Response',
+        message: 'An admin has responded to your feedback: "$feedbackTitle"',
+        type: 'feedback',
+        createdAt: DateTime.now(),
+      );
+
+      await createNotification(notification);
+    } catch (e) {
+      throw Exception('Error sending feedback response notification: $e');
     }
   }
 }

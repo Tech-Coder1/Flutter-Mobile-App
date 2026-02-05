@@ -1,9 +1,14 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import '../models/progress_model.dart';
+import 'certificate_service.dart';
+import 'notification_service.dart';
 
 class ProgressService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collection = 'user_progress';
+  final _certificateService = CertificateService();
+  final _notificationService = NotificationService();
 
   Stream<ProgressModel?> getUserProgress(String userId, String courseId) {
     return _firestore
@@ -67,12 +72,65 @@ class ProgressService {
   }
 
   Future<void> completeCourse(String progressId) async {
-    await _firestore.collection(_collection).doc(progressId).update({
-      'completionPercentage': 100,
-      'completedAt': Timestamp.now(),
-      'updatedAt': Timestamp.now(),
-      'lastAccessedAt': Timestamp.now(),
-    });
+    try {
+      // Get progress document to extract userId and courseId
+      final progressDoc = await _firestore.collection(_collection).doc(progressId).get();
+      if (!progressDoc.exists) {
+        throw Exception('Progress document not found');
+      }
+
+      final data = progressDoc.data()!;
+      final userId = data['userId'] as String;
+      final courseId = data['courseId'] as String;
+
+      // Get course details for certificate and notification
+      final courseDoc = await _firestore.collection('courses').doc(courseId).get();
+      if (!courseDoc.exists) {
+        throw Exception('Course not found');
+      }
+      final courseTitle = courseDoc.data()!['title'] as String? ?? 'Course';
+
+      // Get user details for certificate
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userName = userDoc.exists 
+          ? (userDoc.data()!['fullName'] as String? ?? 'Student')
+          : 'Student';
+
+      // Update progress to 100%
+      await _firestore.collection(_collection).doc(progressId).update({
+        'completionPercentage': 100,
+        'completedAt': Timestamp.now(),
+        'updatedAt': Timestamp.now(),
+        'lastAccessedAt': Timestamp.now(),
+      });
+
+      // Issue certificate
+      try {
+        await _certificateService.issueCertificate(
+          userId: userId,
+          courseId: courseId,
+          courseTitle: courseTitle,
+          userName: userName,
+          completionScore: 100.0,
+        );
+      } catch (e) {
+        debugPrint('Certificate generation failed: $e');
+        // Don't throw - course completion should succeed even if certificate fails
+      }
+
+      // Send completion notification
+      try {
+        await _notificationService.sendCourseCompletionNotification(
+          userId: userId,
+          courseTitle: courseTitle,
+        );
+      } catch (e) {
+        debugPrint('Completion notification failed: $e');
+        // Don't throw - course completion should succeed even if notification fails
+      }
+    } catch (e) {
+      throw Exception('Failed to complete course: $e');
+    }
   }
 
   Future<void> upsertProgress({

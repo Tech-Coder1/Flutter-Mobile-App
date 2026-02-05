@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'notification_service.dart';
 
 class AdminContentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final NotificationService _notificationService = NotificationService();
 
   // Create a new course
   Future<String> createCourse({
@@ -80,24 +82,80 @@ class AdminContentService {
   }
 
   // Approve application
-  Future<void> approveApplication(String applicationId) async {
+  Future<void> approveApplication(String applicationId, {String? adminNotes}) async {
     try {
+      // Get application details first
+      final appDoc = await _firestore
+          .collection('applications')
+          .doc(applicationId)
+          .get();
+      
+      if (!appDoc.exists) {
+        throw Exception('Application not found');
+      }
+
+      final appData = appDoc.data()!;
+      final userId = appData['userId'] as String?;
+      final internshipRole = appData['internshipRole'] as String? ?? 'the position';
+
+      // Update application status
       await _firestore
           .collection('applications')
           .doc(applicationId)
-          .update({'status': 'accepted'});
+          .update({
+            'status': 'accepted',
+            if (adminNotes != null) 'adminNotes': adminNotes,
+            'updatedAt': Timestamp.now(),
+          });
+
+      // Send notification to user
+      if (userId != null) {
+        await _notificationService.sendApplicationApprovedNotification(
+          userId: userId,
+          internshipRole: internshipRole,
+          additionalMessage: adminNotes,
+        );
+      }
     } catch (e) {
       throw Exception('Error approving application: $e');
     }
   }
 
   // Reject application
-  Future<void> rejectApplication(String applicationId) async {
+  Future<void> rejectApplication(String applicationId, {String? reason}) async {
     try {
+      // Get application details first
+      final appDoc = await _firestore
+          .collection('applications')
+          .doc(applicationId)
+          .get();
+      
+      if (!appDoc.exists) {
+        throw Exception('Application not found');
+      }
+
+      final appData = appDoc.data()!;
+      final userId = appData['userId'] as String?;
+      final internshipRole = appData['internshipRole'] as String? ?? 'the position';
+
+      // Update application status
       await _firestore
           .collection('applications')
           .doc(applicationId)
-          .update({'status': 'rejected'});
+          .update({
+            'status': 'rejected',
+            if (reason != null) 'adminNotes': reason,
+            'updatedAt': Timestamp.now(),
+          });
+
+      // Send notification to user
+      if (userId != null) {
+        await _notificationService.sendApplicationRejectedNotification(
+          userId: userId,
+          internshipRole: internshipRole,
+          reason: reason,
+        );
+      }
     } catch (e) {
       throw Exception('Error rejecting application: $e');
     }

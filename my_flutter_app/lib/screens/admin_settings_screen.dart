@@ -5,7 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../widgets/admin_sidebar.dart';
 
 class AdminSettingsScreen extends StatefulWidget {
-  const AdminSettingsScreen({Key? key}) : super(key: key);
+  const AdminSettingsScreen({super.key});
 
   @override
   State<AdminSettingsScreen> createState() => _AdminSettingsScreenState();
@@ -501,11 +501,13 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           ElevatedButton(
             onPressed: () async {
               final user = _authService.currentUser;
+              final nav = Navigator.of(context);
+              final messenger = ScaffoldMessenger.of(context);
               if (user?.email != null) {
                 await _authService.resetPassword(user!.email!);
                 if (mounted) {
-                  Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
+                  nav.pop();
+                  messenger.showSnackBar(
                     const SnackBar(
                       content: Text('Password reset email sent'),
                       backgroundColor: Colors.green,

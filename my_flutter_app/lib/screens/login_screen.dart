@@ -118,12 +118,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   }
                                 }
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Please enter your email'),
-                                    backgroundColor: Colors.orange,
-                                  ),
-                                );
+                                if (mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('Please enter your email'),
+                                      backgroundColor: Colors.orange,
+                                    ),
+                                  );
+                                }
                               }
                             },
                             child: const Text('Forgot password?'),
@@ -134,17 +136,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: _isLoading ? null : () async {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isLoading = true);
+                              final nav = Navigator.of(context);
+                              final messenger = ScaffoldMessenger.of(context);
                               try {
                                 await _authService.signInUser(
                                   email: _emailController.text.trim(),
                                   password: _passwordController.text,
                                 );
                                 if (mounted) {
-                                  Navigator.pushReplacementNamed(context, '/user_dashboard');
+                                  nav.pushReplacementNamed('/user_dashboard');
                                 }
                               } catch (e) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  messenger.showSnackBar(
                                     SnackBar(
                                       content: Text(e.toString()),
                                       backgroundColor: Colors.red,
@@ -178,14 +182,16 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? null
                               : () async {
                                   setState(() => _isLoading = true);
+                                  final nav = Navigator.of(context);
+                                  final messenger = ScaffoldMessenger.of(context);
                                   try {
                                     await _authService.signInWithGoogle();
                                     if (mounted) {
-                                      Navigator.pushReplacementNamed(context, '/user_dashboard');
+                                      nav.pushReplacementNamed('/user_dashboard');
                                     }
                                   } catch (e) {
                                     if (mounted) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      messenger.showSnackBar(
                                         SnackBar(
                                           content: Text(e.toString()),
                                           backgroundColor: Colors.red,

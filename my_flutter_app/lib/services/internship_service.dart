@@ -118,4 +118,96 @@ class InternshipService {
                 internship.location.toLowerCase().contains(query.toLowerCase()))
             .toList());
   }
+
+  // Get all applications for a specific internship
+  Future<List<Map<String, dynamic>>> getInternshipApplications(String internshipId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('applications')
+          .where('internshipId', isEqualTo: internshipId)
+          .orderBy('submittedAt', descending: true)
+          .get();
+      
+      return snapshot.docs.map((doc) => {
+        'applicationId': doc.id,
+        ...doc.data(),
+      }).toList();
+    } catch (e) {
+      throw Exception('Error getting internship applications: $e');
+    }
+  }
+
+  // Get application count for an internship
+  Future<int> getApplicationCount(String internshipId) async {
+    try {
+      final snapshot = await _firestore
+          .collection('applications')
+          .where('internshipId', isEqualTo: internshipId)
+          .get();
+      return snapshot.size;
+    } catch (e) {
+      throw Exception('Error getting application count: $e');
+    }
+  }
+
+  // Toggle internship status (open/closed for applications)
+  Future<void> toggleInternshipStatus(String internshipId, bool isOpen) async {
+    try {
+      await _firestore
+          .collection(_collection)
+          .doc(internshipId)
+          .update({
+            'isOpen': isOpen,
+            'updatedAt': Timestamp.now(),
+          });
+    } catch (e) {
+      throw Exception('Error toggling internship status: $e');
+    }
+  }
+
+  // Get internships by date range (for reports)
+  Future<List<InternshipModel>> getInternshipsByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection(_collection)
+          .where('postedAt', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where('postedAt', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
+          .orderBy('postedAt', descending: true)
+          .get();
+      return snapshot.docs.map((doc) => InternshipModel.fromFirestore(doc)).toList();
+    } catch (e) {
+      throw Exception('Error fetching internships by date range: $e');
+    }
+  }
+
+  // Get popular internships (by application count)
+  Future<List<Map<String, dynamic>>> getPopularInternships({int limit = 5}) async {
+    try {
+      final internships = await _firestore
+          .collection(_collection)
+          .orderBy('postedAt', descending: true)
+          .limit(50)
+          .get();
+
+      List<Map<String, dynamic>> internshipsWithCounts = [];
+      
+      for (var doc in internships.docs) {
+        final count = await getApplicationCount(doc.id);
+        internshipsWithCounts.add({
+          'internship': InternshipModel.fromFirestore(doc),
+          'applicationCount': count,
+        });
+      }
+
+      internshipsWithCounts.sort((a, b) => 
+        (b['applicationCount'] as int).compareTo(a['applicationCount'] as int));
+
+      return internshipsWithCounts.take(limit).toList();
+    } catch (e) {
+      throw Exception('Error getting popular internships: $e');
+    }
+  }
 }

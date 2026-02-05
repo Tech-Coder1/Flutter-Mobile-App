@@ -314,7 +314,6 @@ class _CertificatesScreenState extends State<CertificatesScreen> {
           ),
           ElevatedButton.icon(
             onPressed: () {
-              // TODO: Implement download/share functionality
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Download feature coming soon!'),

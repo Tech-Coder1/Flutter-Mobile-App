@@ -35,7 +35,7 @@ class InboxScreen extends StatelessWidget {
           return ListView.separated(
             padding: const EdgeInsets.all(16),
             itemCount: notifications.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 8),
+            separatorBuilder: (_, _) => const SizedBox(height: 8),
             itemBuilder: (context, index) {
               final n = notifications[index];
               final icon = n.type == 'course' ? Icons.school : Icons.work_outline;

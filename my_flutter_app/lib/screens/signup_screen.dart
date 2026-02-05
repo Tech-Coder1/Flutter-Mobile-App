@@ -129,6 +129,8 @@ class _SignupScreenState extends State<SignupScreen> {
                           onPressed: _isLoading ? null : () async {
                             if (_formKey.currentState!.validate()) {
                               setState(() => _isLoading = true);
+                              final nav = Navigator.of(context);
+                              final messenger = ScaffoldMessenger.of(context);
                               try {
                                 await _authService.signUpUser(
                                   email: _emailController.text.trim(),
@@ -136,17 +138,17 @@ class _SignupScreenState extends State<SignupScreen> {
                                   fullName: _nameController.text.trim(),
                                 );
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  messenger.showSnackBar(
                                     const SnackBar(
                                       content: Text('Account created successfully!'),
                                       backgroundColor: Colors.green,
                                     ),
                                   );
-                                  Navigator.pushReplacementNamed(context, '/user_dashboard');
+                                  nav.pushReplacementNamed('/user_dashboard');
                                 }
                               } catch (e) {
                                 if (mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
+                                  messenger.showSnackBar(
                                     SnackBar(
                                       content: Text(e.toString()),
                                       backgroundColor: Colors.red,

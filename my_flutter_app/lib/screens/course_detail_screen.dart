@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/course_model.dart';
+import '../models/feedback_model.dart';
 import '../services/course_service.dart';
 import '../services/auth_service.dart';
 import '../services/notification_service.dart';
 import '../services/progress_service.dart';
+import '../services/feedback_service.dart';
 
 class CourseDetailScreen extends StatefulWidget {
   final CourseModel course;
 
   const CourseDetailScreen({
-    Key? key,
+    super.key,
     required this.course,
-  }) : super(key: key);
+  });
 
   @override
   State<CourseDetailScreen> createState() => _CourseDetailScreenState();
@@ -22,6 +25,7 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
   final CourseService courseService = CourseService();
   final NotificationService notificationService = NotificationService();
   final ProgressService progressService = ProgressService();
+  final FeedbackService feedbackService = FeedbackService();
   late CourseModel course;
   bool isEnrolled = false;
   bool isLoading = false;
@@ -329,6 +333,207 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
                       ),
                     ),
                   ),
+
+                  // Course Reviews and Ratings Section
+                  if (isEnrolled) ...[
+                    const Divider(height: 48),
+                    _buildSection(
+                      title: 'Course Reviews',
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        spacing: 16,
+                        children: [
+                          // Average Rating Display
+                          FutureBuilder<double>(
+                            future: feedbackService.getAverageCourseRating(course.courseId),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return const SizedBox.shrink();
+                              }
+                              final avgRating = snapshot.data ?? 0.0;
+                              return Container(
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFF4169E1).withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  spacing: 16,
+                                  children: [
+                                    Column(
+                                      spacing: 4,
+                                      children: [
+                                        Text(
+                                          avgRating.toStringAsFixed(1),
+                                          style: const TextStyle(
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
+                                            color: Color(0xFF4169E1),
+                                          ),
+                                        ),
+                                        RatingBarIndicator(
+                                          rating: avgRating,
+                                          itemBuilder: (context, index) => const Icon(
+                                            Icons.star,
+                                            color: Colors.amber,
+                                          ),
+                                          itemCount: 5,
+                                          itemSize: 20.0,
+                                        ),
+                                      ],
+                                    ),
+                                    Expanded(
+                                      child: FutureBuilder<int>(
+                                        future: feedbackService.getCourseRatingCount(course.courseId),
+                                        builder: (context, countSnapshot) {
+                                          final count = countSnapshot.data ?? 0;
+                                          return Text(
+                                            'Based on $count ${count == 1 ? 'review' : 'reviews'}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              color: Color(0xFF555555),
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                    ElevatedButton.icon(
+                                      onPressed: _showFeedbackDialog,
+                                      icon: const Icon(Icons.rate_review, size: 18),
+                                      label: const Text('Write Review'),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: const Color(0xFF4169E1),
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 16,
+                                          vertical: 12,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            },
+                          ),
+
+                          // Reviews List
+                          StreamBuilder<List<FeedbackModel>>(
+                            stream: feedbackService.getFeedbackByCourse(course.courseId),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(20.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+
+                              if (snapshot.hasError) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(20.0),
+                                  child: Text(
+                                    'Error loading reviews: ${snapshot.error}',
+                                    style: const TextStyle(color: Colors.red),
+                                  ),
+                                );
+                              }
+
+                              final reviews = snapshot.data ?? [];
+                              
+                              if (reviews.isEmpty) {
+                                return Container(
+                                  padding: const EdgeInsets.all(20),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey[100],
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Center(
+                                    child: Text(
+                                      'No reviews yet. Be the first to review this course!',
+                                      style: TextStyle(
+                                        color: Color(0xFF555555),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+
+                              return Column(
+                                spacing: 12,
+                                children: reviews.map((review) {
+                                  return Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.grey[300]!,
+                                      ),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      spacing: 8,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            RatingBarIndicator(
+                                              rating: review.rating.toDouble(),
+                                              itemBuilder: (context, index) => const Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                              ),
+                                              itemCount: 5,
+                                              itemSize: 18.0,
+                                            ),
+                                            Text(
+                                              _formatDate(review.createdAt),
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.grey[600],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        if (review.message.isNotEmpty)
+                                          Text(
+                                            review.message,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              height: 1.5,
+                                              color: Color(0xFF333333),
+                                            ),
+                                          ),
+                                        if (review.status != 'new')
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: _getStatusColor(review.status),
+                                              borderRadius: BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              review.status.toUpperCase(),
+                                              style: const TextStyle(
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -458,4 +663,168 @@ class _CourseDetailScreenState extends State<CourseDetailScreen> {
       ),
     );
   }
+
+  // Show feedback/review dialog
+  void _showFeedbackDialog() {
+    double rating = 5.0;
+    final commentController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Write a Review'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            spacing: 16,
+            children: [
+              const Text(
+                'Rate this course:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              StatefulBuilder(
+                builder: (context, setState) => RatingBar.builder(
+                  initialRating: rating,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: false,
+                  itemCount: 5,
+                  itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                  itemBuilder: (context, _) => const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  onRatingUpdate: (newRating) {
+                    setState(() => rating = newRating);
+                  },
+                ),
+              ),
+              const Text(
+                'Your comment:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              TextField(
+                controller: commentController,
+                maxLines: 4,
+                decoration: const InputDecoration(
+                  hintText: 'Share your experience with this course...',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _submitFeedback(rating.toInt(), commentController.text);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFF4169E1),
+            ),
+            child: const Text('Submit Review'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Submit course feedback
+  Future<void> _submitFeedback(int rating, String comment) async {
+    try {
+      final currentUser = AuthService().currentUser;
+      if (currentUser == null) return;
+
+      // Get user details
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(currentUser.uid)
+          .get();
+      final userName = userDoc.data()?['fullName'] ?? 'User';
+
+      final feedback = FeedbackModel(
+        feedbackId: '',
+        userId: currentUser.uid,
+        userName: userName,
+        category: 'course',
+        rating: rating.toDouble(),
+        message: comment,
+        referenceType: 'course',
+        referenceId: course.courseId,
+        status: 'new',
+        adminNotes: '',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+
+      await feedbackService.submitFeedback(feedback);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Review submitted successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to submit review: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  // Format date for display
+  String _formatDate(DateTime date) {
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays == 0) {
+      return 'Today';
+    } else if (difference.inDays == 1) {
+      return 'Yesterday';
+    } else if (difference.inDays < 7) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays < 30) {
+      return '${(difference.inDays / 7).floor()} weeks ago';
+    } else if (difference.inDays < 365) {
+      return '${(difference.inDays / 30).floor()} months ago';
+    } else {
+      return '${(difference.inDays / 365).floor()} years ago';
+    }
+  }
+
+  // Get status color for feedback
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'new':
+        return Colors.blue;
+      case 'in_progress':
+        return Colors.orange;
+      case 'resolved':
+        return Colors.green;
+      case 'closed':
+        return Colors.grey;
+      default:
+        return Colors.blue;
+    }
+  }
 }
+

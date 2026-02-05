@@ -4,7 +4,7 @@ import '../models/application_model.dart';
 import '../widgets/admin_sidebar.dart';
 
 class AdminApplicationReviewScreen extends StatefulWidget {
-  const AdminApplicationReviewScreen({Key? key}) : super(key: key);
+  const AdminApplicationReviewScreen({super.key});
 
   @override
   State<AdminApplicationReviewScreen> createState() =>

@@ -52,7 +52,6 @@ class ExcelerateApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Excelerate',
-      builder: (context, child) => SelectionArea(child: child ?? const SizedBox()),
       theme: ThemeData(
         primaryColor: const Color(0xFF4169E1), // Soft royal blue
         scaffoldBackgroundColor: Colors.white,

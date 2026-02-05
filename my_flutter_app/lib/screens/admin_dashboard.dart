@@ -63,9 +63,10 @@ class _AdminDashboardState extends State<AdminDashboard> {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
+              final nav = Navigator.of(context);
               await authService.signOut();
               if (mounted) {
-                Navigator.pushReplacementNamed(context, '/login');
+                nav.pushReplacementNamed('/login');
               }
             },
           ),
@@ -673,13 +674,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       _courseLevelController.clear();
       _courseDescriptionController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Course created successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Course created successfully')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create course: $e')));
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed to create course: $e')));
+      }
     } finally {
       if (mounted) setState(() => _creatingCourse = false);
     }
@@ -789,13 +794,17 @@ class _AdminDashboardState extends State<AdminDashboard> {
       _internTypeController.clear();
       _internDescriptionController.clear();
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Internship created successfully')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Internship created successfully')),
+        );
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create internship: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create internship: $e')),
+        );
+      }
     } finally {
       if (mounted) setState(() => _creatingInternship = false);
     }

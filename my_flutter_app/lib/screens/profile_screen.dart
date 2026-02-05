@@ -226,11 +226,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                             TextButton(
                               onPressed: () async {
+                                final nav = Navigator.of(context);
                                 await authService.signOut();
                                 if (mounted) {
-                                  Navigator.pop(context);
-                                  Navigator.pushNamedAndRemoveUntil(
-                                    context,
+                                  nav.pop();
+                                  nav.pushNamedAndRemoveUntil(
                                     '/login',
                                     (route) => false,
                                   );

@@ -3,10 +3,11 @@ import 'package:fl_chart/fl_chart.dart';
 import '../services/user_service.dart';
 import '../services/course_service.dart';
 import '../services/application_service.dart';
+import '../services/export_service.dart';
 import '../widgets/admin_sidebar.dart';
 
 class AdminAnalyticsScreen extends StatefulWidget {
-  const AdminAnalyticsScreen({Key? key}) : super(key: key);
+  const AdminAnalyticsScreen({super.key});
 
   @override
   State<AdminAnalyticsScreen> createState() => _AdminAnalyticsScreenState();
@@ -16,6 +17,7 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
   final _userService = UserService();
   final _courseService = CourseService();
   final _applicationService = ApplicationService();
+  final _exportService = ExportService();
 
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 90));
   DateTime _endDate = DateTime.now();
@@ -685,12 +687,130 @@ class _AdminAnalyticsScreenState extends State<AdminAnalyticsScreen> {
     }
   }
 
-  void _exportData() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Export functionality coming soon...'),
-        backgroundColor: Color(0xFF4169E1),
+  void _exportData() async {
+    // Show export options dialog
+    final exportType = await showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Export Data'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.people),
+              title: const Text('Export Users'),
+              onTap: () => Navigator.pop(context, 'users'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.school),
+              title: const Text('Export Enrollments'),
+              onTap: () => Navigator.pop(context, 'enrollments'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.work),
+              title: const Text('Export Applications'),
+              onTap: () => Navigator.pop(context, 'applications'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.book),
+              title: const Text('Export Courses'),
+              onTap: () => Navigator.pop(context, 'courses'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.business),
+              title: const Text('Export Internships'),
+              onTap: () => Navigator.pop(context, 'internships'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.feedback),
+              title: const Text('Export Feedback'),
+              onTap: () => Navigator.pop(context, 'feedback'),
+            ),
+          ],
+        ),
       ),
     );
+
+    if (exportType == null) return;
+
+    // Show loading indicator
+    if (!mounted) return;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(
+        child: CircularProgressIndicator(),
+      ),
+    );
+
+    try {
+      String csvContent = '';
+      String filename = '';
+
+      switch (exportType) {
+        case 'users':
+          csvContent = await _exportService.exportUsersToCSV();
+          filename = 'users_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+        case 'enrollments':
+          csvContent = await _exportService.exportEnrollmentsToCSV(
+            startDate: _startDate,
+            endDate: _endDate,
+          );
+          filename = 'enrollments_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+        case 'applications':
+          csvContent = await _exportService.exportApplicationsToCSV(
+            startDate: _startDate,
+            endDate: _endDate,
+          );
+          filename = 'applications_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+        case 'courses':
+          csvContent = await _exportService.exportCoursesToCSV();
+          filename = 'courses_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+        case 'internships':
+          csvContent = await _exportService.exportInternshipsToCSV();
+          filename = 'internships_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+        case 'feedback':
+          csvContent = await _exportService.exportFeedbackToCSV(
+            startDate: _startDate,
+            endDate: _endDate,
+          );
+          filename = 'feedback_${DateTime.now().millisecondsSinceEpoch}.csv';
+          break;
+      }
+
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      // For web, download the CSV
+      _exportService.downloadCSV(csvContent, filename);
+
+      // Show success message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$exportType data exported successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      // Close loading dialog
+      if (mounted) Navigator.pop(context);
+
+      // Show error message
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Export failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 }

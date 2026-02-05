@@ -86,22 +86,21 @@ class _AdminLoginScreenState extends State<AdminLoginScreen> {
                               : () async {
                                   if (_formKey.currentState!.validate()) {
                                     setState(() => _isLoading = true);
+                                    final nav = Navigator.of(context);
                                     try {
                                       await _authService.signInAdmin(
                                         email: _emailController.text.trim(),
                                         password: _passwordController.text,
                                       );
                                       if (mounted) {
-                                        Navigator.pushReplacementNamed(
-                                          context,
+                                        nav.pushReplacementNamed(
                                           '/admin_dashboard',
                                         );
                                       }
                                     } catch (e) {
                                       if (mounted) {
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
+                                        final messenger = ScaffoldMessenger.of(context);
+                                        messenger.showSnackBar(
                                           SnackBar(
                                             content: Text(e.toString()),
                                             backgroundColor: Colors.red,
